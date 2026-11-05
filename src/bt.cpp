@@ -739,7 +739,7 @@ static void __not_in_flash_func(l2cap_packet_handler)(uint8_t packet_type, uint1
             if (size >= 2 && packet[0] == 0xA3) {
                 const uint8_t report_id = packet[1];
                 feature_data[report_id].assign(packet + 2, packet + size);
-                feature_rx_epoch[report_id]++;
+                feature_rx_epoch[report_id] = feature_rx_epoch[report_id] + 1; // ++ on volatile is deprecated in C++20
 #if ENABLE_VERBOSE
                 printf("[L2CAP] Stored Feature Report 0x%02X, len=%u\n", report_id, size - 2);
                 printf("[L2CAP] HID Control data len=%u\n", size);
