@@ -50,7 +50,7 @@ param(
     [switch]$Clean,
     # Project to build when this script is run standalone (not from inside a
     # checkout). Override to build a fork.
-    [string]$Repo = 'https://github.com/awalol/DS5Dongle.git',
+    [string]$Repo = 'https://github.com/LeParfait271/MiraLink-DS5.git',
     # Branch/tag/SHA to build when cloned standalone. Empty = default branch.
     [string]$Ref = ''
 )
