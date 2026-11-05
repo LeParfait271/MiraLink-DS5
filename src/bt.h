@@ -41,6 +41,8 @@ std::vector<uint8_t> get_feature_data_live(uint8_t reportId, uint16_t timeout_ms
 void init_feature();
 void set_feature_data(uint8_t reportId, uint8_t* data,uint16_t len);
 void bt_inquiring_led();
+// Main-loop hook: restarts inquiry after BT_AUTO_INQUIRY_INTERVAL_MS idle.
+void bt_auto_inquiry_tick();
 // BOOTSEL button actions, dispatched from button_functions.cpp.
 void bt_bootsel_click_action();
 void bt_bootsel_hold_action();

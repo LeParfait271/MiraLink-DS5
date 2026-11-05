@@ -20,6 +20,7 @@
 #include "hardware/clocks.h"
 #include "hardware/vreg.h"
 #include "hardware/watchdog.h"
+#include "pico/time.h"
 #include "pico/cyw43_arch.h"
 #if ENABLE_SERIAL
 #include "pico/stdio_usb.h"
@@ -39,38 +40,36 @@ USBGetStateData interrupt_in_data{};
 
 bool report_dirty = false;
 
+// Log at most once per second: this path runs every main-loop iteration, and a
+// host that stops reading would otherwise flood the console and add jitter.
+static void __not_in_flash_func(log_hid_report_error)() {
+    static uint32_t last_ms = 0;
+    static uint32_t suppressed = 0;
+    const uint32_t now = to_ms_since_boot(get_absolute_time());
+    if (now - last_ms < 1000) {
+        suppressed++;
+        return;
+    }
+    printf("[USBHID] tud_hid_report error (+%lu suppressed)\n", (unsigned long) suppressed);
+    last_ms = now;
+    suppressed = 0;
+}
+
 void __not_in_flash_func(interrupt_loop)() {
     if (usb_keyboard_only || usb_reconfiguring || !tud_hid_ready()) return;
 
-    // TODO: Refactor for better code reuse
-    if (get_config().polling_rate_mode != 3) {
-        USBGetStateData report = interrupt_in_data;
-        button_remap_apply(report);
-        if (!tud_hid_report(0x01, &report, sizeof(report))) {
-            printf("[USBHID] tud_hid_report error\n");
-        }
-        return;
-    }
+    // Real-time mode (3) only forwards fresh BT frames; fixed-rate modes resend
+    // the latest state on every USB poll.
+    const bool realtime = get_config().polling_rate_mode == 3;
+    if (realtime && !report_dirty) return;
 
-    bool should_send = false;
-    USBGetStateData report{};
-
-    if (report_dirty) {
-        report = interrupt_in_data;
-        report_dirty = false;
-        should_send = true;
-    }
-
-    // Only send to TinyUSB if we actually grabbed fresh data
-    if (should_send) {
-        button_remap_apply(report);
-        if (!tud_hid_report(0x01, &report, sizeof(report))) {
-            printf("[USBHID] tud_hid_report error\n");
-
-            // If the report failed to queue, restore the dirty flag 
-            // so we try again on the next loop iteration.
-            report_dirty = true;
-        }
+    USBGetStateData report = interrupt_in_data;
+    report_dirty = false;
+    button_remap_apply(report);
+    if (!tud_hid_report(0x01, &report, sizeof(report))) {
+        log_hid_report_error();
+        // Retry on the next iteration rather than dropping the frame.
+        if (realtime) report_dirty = true;
     }
 }
 
@@ -282,13 +281,14 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
         // TinyUSB owns this buffer. USB printf() may re-enter tud_task() and reuse it,
         // so copy the entire command before printing or processing it.
         uint8_t buf_copy[CFG_TUD_HID_EP_BUFSIZE];
-        memcpy(buf_copy, buffer, bufsize);
+        const uint16_t n = bufsize < sizeof(buf_copy) ? bufsize : (uint16_t) sizeof(buf_copy);
+        memcpy(buf_copy, buffer, n);
 
 #if ENABLE_VERBOSE
-        printf("[HID] Receive 0x%02X setting config, funcid:0x%02X\n", report_id, buf_copy[0]);
+        printf("[HID] Receive 0x%02X setting config, funcid:0x%02X\n", report_id, n ? buf_copy[0] : 0);
 #endif
 
-        pico_cmd_set(report_id, buf_copy, bufsize);
+        pico_cmd_set(report_id, buf_copy, n);
         return;
     }
 
@@ -419,5 +419,6 @@ int main() {
 #endif
         button_check();
         bt_inquiring_led();
+        bt_auto_inquiry_tick();
     }
 }

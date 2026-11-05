@@ -195,6 +195,18 @@ void shortcut_valid() {
 void config_load() {
     memcpy(&storage, get_xip_addr(CONFIG_FLASH_OFFSET), sizeof(storage));
 
+    // config_save() always writes the CRC, so a valid-magic sector with a bad
+    // CRC is torn/corrupted (e.g. power lost mid-write). Per-field validation
+    // alone could accept garbage that happens to be in range (remaps,
+    // shortcuts), so fall back to defaults instead. An erased sector (magic
+    // != CONFIG_MAGIC) still goes through the old-sector migration below.
+    if (storage.config.magic == CONFIG_MAGIC && storage.config.crc32 != calc_config_crc(storage)) {
+        printf("[Config] CRC mismatch (stored 0x%08lX), reset to defaults\n",
+               (unsigned long) storage.config.crc32);
+        memset(&storage, 0xFF, sizeof(storage)); // 0xFF = "unset": config_valid() fills defaults
+        storage.config.magic = CONFIG_MAGIC;
+    }
+
     config_valid();
 }
 
@@ -268,11 +280,8 @@ void set_config(const uint8_t *new_config, const uint16_t len) {
         gpio_on_disconnect();
     }
 
-    if (config.body.disable_pico_led) {
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, false);
-    }else {
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
-    }
+    // The LED means "controller connected"; don't light it while idle/pairing.
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, controller_connected && !config.body.disable_pico_led);
     SetStateData state{};
     if (config.body.trigger_reduce > 0) {
         state.AllowMotorPowerLevel = 1;

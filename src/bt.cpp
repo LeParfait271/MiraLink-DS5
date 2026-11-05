@@ -50,6 +50,15 @@ static bool device_found = false;
 static bool new_pair = false; // 只有新匹配的设备才用创建channel，自动重连走的是service
 bool bt_inquiring = false;
 
+// Periodic re-inquiry while idle, so a controller put into pairing mode is
+// found without pressing BOOTSEL. PS-only reconnects use page scan and are
+// unaffected. Define BT_AUTO_INQUIRY_INTERVAL_MS=0 at build time to disable.
+#ifndef BT_AUTO_INQUIRY_INTERVAL_MS
+#define BT_AUTO_INQUIRY_INTERVAL_MS 30000
+#endif
+static bool bt_stack_ready = false;
+static uint32_t bt_idle_since_ms = 0;
+
 // LED triple-flash confirmation state for clear-all action
 static int bt_clear_flash_toggles_remaining = 0;
 static uint32_t bt_clear_flash_last_toggle_ms = 0;
@@ -177,21 +186,6 @@ int bt_init() {
     hci_power_control(HCI_POWER_ON);
     return 0;
 }
-
-/*int main() {
-    stdio_init_all();
-
-    /*while (!stdio_usb_connected()) {
-        sleep_ms(100);
-    }
-    printf("USB Serial connected!\n");#1#
-
-    bt_init();
-
-    while (1) {
-        sleep_ms(10);
-    }
-}*/
 
 // Persist the current bt_cleared_addrs[] blacklist to BTstack TLV flash.
 // Empty list -> delete the tag. Called whenever the list changes.
@@ -350,6 +344,22 @@ void bt_bootsel_hold_action() {
     bt_clear_flash_last_toggle_ms = to_ms_since_boot(get_absolute_time());
 }
 
+void bt_auto_inquiry_tick() {
+#if BT_AUTO_INQUIRY_INTERVAL_MS > 0
+    // Idle = stack up, no ACL link (incl. one being set up), nothing latched.
+    if (!bt_stack_ready || bt_inquiring || device_found || new_pair ||
+        acl_handle != HCI_CON_HANDLE_INVALID) {
+        return;
+    }
+    const uint32_t now = to_ms_since_boot(get_absolute_time());
+    if (now - bt_idle_since_ms < BT_AUTO_INQUIRY_INTERVAL_MS) return;
+    printf("[BT] Idle %u ms, auto inquiry\n", (unsigned) BT_AUTO_INQUIRY_INTERVAL_MS);
+    bt_idle_since_ms = now;
+    gap_inquiry_start(30);
+    bt_inquiring = true;
+#endif
+}
+
 void bt_inquiring_led() {
     // BOOTSEL clear-confirmation triple-flash takes priority over inquiry blink
     if (bt_clear_flash_toggles_remaining > 0) {
@@ -406,6 +416,7 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
                 bt_blacklist_load();
                 gap_inquiry_start(30);
                 bt_inquiring = true;
+                bt_stack_ready = true;
             }
             break;
         }
@@ -450,7 +461,12 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
         case HCI_EVENT_INQUIRY_COMPLETE: {
             printf("[HCI] Inquiry complete.\n");
             bt_inquiring = false;
-            if (device_found) {
+            bt_idle_since_ms = to_ms_since_boot(get_absolute_time());
+            // Both GAP_ and HCI_ completion events can arrive for one inquiry;
+            // new_pair marks that create_connection was already sent, so a
+            // second completion must not issue a duplicate (which fails with
+            // "ACL already exists" and clears new_pair mid-pairing).
+            if (device_found && !new_pair) {
                 printf("[HCI] Connecting to %s...\n", bd_addr_to_str(current_device_addr));
                 new_pair = true;
                 hci_send_cmd(&hci_create_connection, current_device_addr,
@@ -539,11 +555,16 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
             link_key_t link_key;
             link_key_type_t link_key_type;
             bool link = gap_get_link_key_for_bd_addr(addr, link_key, &link_key_type);
-            printf("[HCI] Link key: ");
-            for (int i = 0; i < sizeof(link_key_t); i++) {
-                printf("%02X", link_key[i]);
+#if ENABLE_VERBOSE
+            // Secret material: only dump it in verbose builds, and only when a key exists.
+            if (link) {
+                printf("[HCI] Link key: ");
+                for (size_t i = 0; i < sizeof(link_key_t); i++) {
+                    printf("%02X", link_key[i]);
+                }
+                printf("\n");
             }
-            printf("\n");
+#endif
             if (link) {
                 printf("[HCI] Link key request from %s, reply stored key type=%u\n", bd_addr_to_str(addr),
                        (unsigned int) link_key_type);
@@ -587,6 +608,7 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
                 }
                 bt_disconnect();
                 gap_inquiry_start(30);
+                bt_inquiring = true;
             } else {
                 hci_send_cmd(&hci_set_connection_encryption, handle, 1);
             }
@@ -665,7 +687,10 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
             battery_led_on_disconnect();
 #endif
             printf("[HCI] Disconnected reason=0x%02X\n", reason);
-            bt_data_callback(INTERRUPT, const_cast<uint8_t *>(state_init_data), sizeof(state_init_data));
+            bt_idle_since_ms = to_ms_since_boot(get_absolute_time());
+            if (bt_data_callback) {
+                bt_data_callback(INTERRUPT, const_cast<uint8_t *>(state_init_data), sizeof(state_init_data));
+            }
             // gap_inquiry_start(30);
             // bt_inquiring = true;
             break;
@@ -711,7 +736,7 @@ static void __not_in_flash_func(l2cap_packet_handler)(uint8_t packet_type, uint1
                 bt_disconnect();
             }
         } else if (channel == hid_control_cid) {
-            if (packet[0] == 0xA3) {
+            if (size >= 2 && packet[0] == 0xA3) {
                 const uint8_t report_id = packet[1];
                 feature_data[report_id].assign(packet + 2, packet + size);
                 feature_rx_epoch[report_id]++;
@@ -721,7 +746,7 @@ static void __not_in_flash_func(l2cap_packet_handler)(uint8_t packet_type, uint1
                 printf_hexdump(packet, size);
 #endif
                 if (report_id == 0x20) {
-                    if (packet[23] == 0x44) {
+                    if (size > 23 && packet[23] == 0x44) {
                         printf("Connected DSE Controller\n");
                         is_dse = true;
 
@@ -898,13 +923,23 @@ static bool control_send_wait(const uint8_t *data, uint16_t len, uint16_t timeou
 void __not_in_flash_func(bt_write)(const uint8_t *data, const uint16_t len) {
     if (hid_interrupt_cid == 0) return;
     static send_element packet{};
+    if (len + 1u > sizeof(packet.data)) {
+        printf("[L2CAP bt_write] Error: packet too long (%u)\n", len);
+        return;
+    }
     packet.len = len + 1;
     packet.data[0] = 0xA2;
     memcpy(packet.data + 1, data, len);
     fill_output_report_checksum(packet.data + 1, len);
 
     if (!queue_try_add(&send_fifo, &packet)) {
-        printf("[L2CAP bt_write] Error: Failed to add packet to send FIFO\n");
+        // Rate-limited: a stalled link fills the FIFO and this would fire per packet.
+        static uint32_t last_log_ms = 0;
+        const uint32_t now = to_ms_since_boot(get_absolute_time());
+        if (now - last_log_ms >= 1000) {
+            last_log_ms = now;
+            printf("[L2CAP bt_write] Error: send FIFO full, dropping packet\n");
+        }
         return;
     }
     if (queue_get_level(&send_fifo) == 1) {

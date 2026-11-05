@@ -39,22 +39,6 @@ float volume[2] = {0.0f,48.0f}; // 0: SPEAKER(0x02) 1: MIC(0x05)
 #define UAC1_ENTITY_SPK_FEATURE_UNIT    0x02
 #define UAC1_ENTITY_MIC_FEATURE_UNIT    0x05
 
-/*int main() {
-    board_init();
-
-    tusb_rhport_init_t dev_init = {
-        .role = TUSB_ROLE_DEVICE,
-        .speed = TUSB_SPEED_AUTO
-    };
-    tusb_init(BOARD_TUD_RHPORT, &dev_init);
-
-    board_init_after_tusb();
-
-    while (1) {
-        tud_task();
-    }
-}*/
-
 //--------------------------------------------------------------------+
 // Audio Callback Functions
 //--------------------------------------------------------------------+
@@ -64,7 +48,6 @@ float volume[2] = {0.0f,48.0f}; // 0: SPEAKER(0x02) 1: MIC(0x05)
 //--------------------------------------------------------------------+
 
 static bool audio10_set_req_entity(tusb_control_request_t const *p_request, uint8_t *pBuff) {
-    uint8_t channelNum = TU_U16_LOW(p_request->wValue);
     uint8_t ctrlSel = TU_U16_HIGH(p_request->wValue);
     uint8_t entityID = TU_U16_HIGH(p_request->wIndex);
     uint8_t index = entityID == UAC1_ENTITY_SPK_FEATURE_UNIT ? 0 : 1;
@@ -120,7 +103,7 @@ static bool audio10_set_req_entity(tusb_control_request_t const *p_request, uint
                             update_state(state);
                         }
 
-                        TU_LOG2("    Set Volume: %d dB of entity: %u\r\n", volume[index], entityID);
+                        TU_LOG2("    Set Volume: %d dB of entity: %u\r\n", (int) volume[index], entityID);
                         return true;
 
                     default:
@@ -138,7 +121,6 @@ static bool audio10_set_req_entity(tusb_control_request_t const *p_request, uint
 }
 
 static bool audio10_get_req_entity(uint8_t rhport, tusb_control_request_t const *p_request) {
-    uint8_t channelNum = TU_U16_LOW(p_request->wValue);
     uint8_t ctrlSel = TU_U16_HIGH(p_request->wValue);
     uint8_t entityID = TU_U16_HIGH(p_request->wIndex);
     uint8_t index = entityID == UAC1_ENTITY_SPK_FEATURE_UNIT ? 0 : 1;
