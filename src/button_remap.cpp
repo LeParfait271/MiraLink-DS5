@@ -121,6 +121,13 @@ void button_remap_apply(USBGetStateData &state_data) {
             case ButtonRightFunction: state_data.ButtonRightFunction |= pressed; break;
             case ButtonLeftPaddle: state_data.ButtonLeftPaddle |= pressed; break;
             case ButtonRightPaddle: state_data.ButtonRightPaddle |= pressed; break;
+            case ComboHomeR2:
+                if (pressed) {
+                    state_data.ButtonHome = 1;
+                    state_data.ButtonR2 = 1;
+                    state_data.TriggerRight = 0xFF; // games reading the analog axis see a full pull
+                }
+                break;
             default: {
                 break;
             }

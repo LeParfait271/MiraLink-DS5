@@ -65,6 +65,11 @@ void __not_in_flash_func(interrupt_loop)() {
 
     USBGetStateData report = interrupt_in_data;
     report_dirty = false;
+    if (get_config().disable_touchpad) {
+        report.ButtonPad = 0;
+        report.Touch.Finger[0].NotTouching = 1;
+        report.Touch.Finger[1].NotTouching = 1;
+    }
     button_remap_apply(report);
     if (!tud_hid_report(0x01, &report, sizeof(report))) {
         log_hid_report_error();

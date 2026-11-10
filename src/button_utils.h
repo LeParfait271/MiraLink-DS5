@@ -36,6 +36,10 @@ enum ButtonId : uint8_t {
     ButtonRightPaddle,
 
     Disable,
+
+    // Remap-only target (never a source button): presses PS + R2 together,
+    // e.g. Steam's screenshot chord (#217).
+    ComboHomeR2,
 };
 
 bool button_is_pressed(const USBGetStateData& state_data, uint8_t button);

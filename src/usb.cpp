@@ -178,8 +178,10 @@ static bool audio10_get_req_entity(uint8_t rhport, tusb_control_request_t const 
                                 res[0] = 0x00;
                                 res[1] = 0x01;
                             }else {
-                                res[0] = 0x7a;
-                                res[1] = 0x00;
+                                // 1 dB steps so 0..48 dB divides evenly (was
+                                // 0x007A = ~0.48 dB, mis-scaled by hosts, #262).
+                                res[0] = 0x00;
+                                res[1] = 0x01;
                             }
                             return tud_audio_buffer_and_schedule_control_xfer(rhport, p_request, &res, sizeof(res));
                         }

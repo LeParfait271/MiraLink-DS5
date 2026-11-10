@@ -29,3 +29,20 @@ Base : awalol/DS5Dongle @ 77d378e. Original intact dans `../DS5Dongle.orig` pour
 2. Reconnexion par PS seul pendant une recherche automatique en cours.
 3. Démarrage avec une config existante : elle doit être conservée.
 4. Les 4 modes de polling_rate.
+
+## 3e passe : issues upstream
+
+| Issue | Changement | État |
+|---|---|---|
+| #118 | Option `disable_touchpad` : masque la surface et le clic du pavé tactile côté PC | implémenté, à tester |
+| #291 | Option `symmetric_haptics` : moyenne gauche/droite envoyée aux deux actionneurs | implémenté, à tester |
+| #217 | Nouvelle cible de remap `PS+R2` (ex. `config_tool.py remap create=ps+r2`, capture Steam) | implémenté, à tester |
+| #262 | Résolution volume micro 1 dB (au lieu de ~0,48 dB), plage 0–48 dB exacte pour Windows | hypothèse, à tester |
+| #295 | `config_tool.py` acceptait 0–2 avec des libellés faux ; maintenant 0–3 = 250/500/1000 Hz/temps réel | cause du bug d'affichage web non trouvée (l'interface web n'est pas dans le dépôt) |
+| #116 | Déjà possible : raccourci action « Consumer » Volume+ (0xE9) / Volume− (0xEA), build `wake` | rien à changer |
+| #266 | PR auto-haptics (31 000 lignes, 118 fichiers, basée sur v0.7.2, en conflit) | non intégrée : trop gros pour le faire sans tests matériel |
+| #228, #268, #188, #285, #218, #127 | Régressions gâchettes / bruits audio / latence | nécessitent le matériel et des logs |
+
+Les deux nouvelles options sont ajoutées à la fin de `Config_body`, sans changer `CONFIG_VERSION` : les configs existantes sont conservées (les nouvelles options sont désactivées par défaut). L'interface web d'awalol ne les connaît pas ; utiliser `tools/config_tool.py`.
+
+CI : workflow `tests.yml` (tests hôte) ajouté, GitHub Actions activé sur le fork (le build `.uf2` tourne à chaque push).

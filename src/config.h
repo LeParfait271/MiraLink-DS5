@@ -39,6 +39,8 @@ struct __attribute__((packed)) Config_body {
     uint8_t status_gpio_mode; // 0: high while connected, 1: button pulse on connect
     uint8_t packet_mode; // 0: double packet(default), 1: single packet
     uint8_t disconnect_on_dock; // bool: 0 disable(default), 1 enable
+    uint8_t disable_touchpad; // bool: hide touch surface + click from the host (#118)
+    uint8_t symmetric_haptics; // bool: send the L/R average to both actuators (#291)
 };
 
 static_assert(sizeof(Config_body) + 1 <= 63); // 0xF6 funcid + body

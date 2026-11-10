@@ -187,6 +187,8 @@ def normalize_button_name(name):
     return "".join(c for c in name.lower() if c.isalnum())
 
 
+COMBO_HOME_R2_ID = BUTTON_COUNT  # remap target only (firmware ComboHomeR2): PS + R2 chord
+
 BUTTON_NAME_TO_ID = {
     normalize_button_name(name): index
     for index, name in enumerate(BUTTON_NAMES)
@@ -215,6 +217,9 @@ BUTTON_NAME_TO_ID.update({
     "ps": BUTTON_NAME_TO_ID["home"],
     "touchpad": BUTTON_NAME_TO_ID["pad"],
     "off": BUTTON_NAME_TO_ID["disable"],
+    "psr2": COMBO_HOME_R2_ID,
+    "homer2": COMBO_HOME_R2_ID,
+    "screenshot": COMBO_HOME_R2_ID,
 })
 
 # These are CLI-only conveniences, not ButtonId enum members. Clearing a remap
@@ -236,7 +241,7 @@ FIELDS = [
     ("speaker_gain",       "u8",    lambda v: 0 <= v <= 7,       "[0, 7]"),
     ("inactive_time",      "u8",    lambda v: 0 <= v <= 60,      "[0, 60] minutes (0 disable)"),
     ("disable_pico_led",   "u8",    lambda v: v in (0, 1),       "0/1"),
-    ("polling_rate_mode",  "u8",    lambda v: v in (0, 1, 2),    "0:250Hz 1:500Hz 2:real-time"),
+    ("polling_rate_mode",  "u8",    lambda v: v in (0, 1, 2, 3), "0:250Hz 1:500Hz 2:1000Hz 3:real-time"),
     ("audio_buffer_length","u8",    lambda v: 16 <= v <= 128,    "[16, 128]"),
     ("controller_mode",    "u8",    lambda v: v in (0, 1, 2),    "0:DS5 1:DSE 2:Auto"),
     ("enable_usb_sn",      "u8",    lambda v: v in (0, 1),       "0/1 (USB serial number)"),
@@ -250,6 +255,8 @@ FIELDS = [
     ("status_gpio_mode",   "u8",    lambda v: v in (0, 1),       "0:pull high 1:200ms button pulse"),
     ("packet_mode",        "u8",    lambda v: v in (0, 1),       "0:double packet 1:single packet"),
     ("disconnect_on_dock", "u8",    lambda v: v in (0, 1),       "0/1 (drop the BT link while the controller sits on a charger/dock)"),
+    ("disable_touchpad",   "u8",    lambda v: v in (0, 1),       "0/1 (hide touchpad surface and click from the host)"),
+    ("symmetric_haptics",  "u8",    lambda v: v in (0, 1),       "0/1 (average left/right haptics onto both sides)"),
 ]
 FIELD_NAMES = [f[0] for f in FIELDS]
 # Little-endian, no padding -- matches __attribute__((packed)) Config_body.
@@ -504,16 +511,18 @@ def cmd_set(args):
 def parse_button(raw, *, source):
     key = normalize_button_name(raw)
     if key not in BUTTON_NAME_TO_ID:
-        valid_names = BUTTON_NAMES[:-1] if source else BUTTON_NAMES + ("NoMap",)
+        valid_names = BUTTON_NAMES[:-1] if source else BUTTON_NAMES + ("PS+R2", "NoMap")
         valid = ", ".join(valid_names)
         sys.exit(f"Unknown button '{raw}'. Valid buttons: {valid}.")
     button_id = BUTTON_NAME_TO_ID[key]
-    if source and button_id == BUTTON_COUNT - 1:
+    if source and button_id >= BUTTON_COUNT - 1:
         sys.exit(f"'{raw}' cannot be used as a source button.")
     return button_id
 
 
 def button_name(button_id):
+    if button_id == COMBO_HOME_R2_ID:
+        return "PS+R2"
     return BUTTON_NAMES[button_id] if 0 <= button_id < BUTTON_COUNT else f"Invalid({button_id})"
 
 

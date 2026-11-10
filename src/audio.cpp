@@ -392,6 +392,9 @@ void __not_in_flash_func(audio_loop)() {
     for (int i = 0; i < out_frames; i++) {
         int val_l = static_cast<int>(out_buf[i * 2] * 127.0f * haptics_gain);
         int val_r = static_cast<int>(out_buf[i * 2 + 1] * 127.0f * haptics_gain);
+        if (cfg.symmetric_haptics) {
+            val_l = val_r = (val_l + val_r) / 2;
+        }
         haptic_buf[haptic_buf_pos++] = static_cast<int8_t>(clamp(val_l, -128, 127));
         haptic_buf[haptic_buf_pos++] = static_cast<int8_t>(clamp(val_r, -128, 127));
 
