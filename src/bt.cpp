@@ -58,6 +58,9 @@ bool bt_inquiring = false;
 #endif
 static bool bt_stack_ready = false;
 static uint32_t bt_idle_since_ms = 0;
+// True while the running inquiry was started by bt_auto_inquiry_tick(): the LED
+// only blinks for user-visible scans (boot, BOOTSEL click, auth retry).
+static bool bt_inquiry_silent = false;
 
 // LED triple-flash confirmation state for clear-all action
 static int bt_clear_flash_toggles_remaining = 0;
@@ -301,6 +304,7 @@ void bt_bootsel_click_action() {
     } else {
         gap_inquiry_start(30);
         bt_inquiring = true;
+        bt_inquiry_silent = false;
     }
 }
 
@@ -357,6 +361,7 @@ void bt_auto_inquiry_tick() {
     bt_idle_since_ms = now;
     gap_inquiry_start(30);
     bt_inquiring = true;
+    bt_inquiry_silent = true; // background scan: no LED blink
 #endif
 }
 
@@ -376,7 +381,7 @@ void bt_inquiring_led() {
         return;
     }
     static bool led_status = false;
-    if (!bt_inquiring) {
+    if (!bt_inquiring || bt_inquiry_silent) { // auto inquiry: keep the LED dark
         if (led_status) {
             cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, false);
         }
@@ -416,6 +421,7 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
                 bt_blacklist_load();
                 gap_inquiry_start(30);
                 bt_inquiring = true;
+                bt_inquiry_silent = false;
                 bt_stack_ready = true;
             }
             break;
@@ -609,6 +615,7 @@ static void __not_in_flash_func(hci_packet_handler)(uint8_t packet_type, uint16_
                 bt_disconnect();
                 gap_inquiry_start(30);
                 bt_inquiring = true;
+                bt_inquiry_silent = false;
             } else {
                 hci_send_cmd(&hci_set_connection_encryption, handle, 1);
             }
