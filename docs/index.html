@@ -3,106 +3,191 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MiraLink-DS5 Config</title>
+<title>MiraLink-DS5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f3f4f7;--card:#fff;--fg:#16191d;--mut:#5f6874;--line:#e1e4e9;--soft:#eef1f6;--acc:#2f6fed;--acc-fg:#fff;--ok:#16834a;--warn:#a85208;--err:#c62828}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1114;--card:#191c21;--fg:#eceef1;--mut:#9ba4ae;--line:#2a2f36;--soft:#22262d;--acc:#6b9bff;--acc-fg:#0f1114;--ok:#4cc47f;--warn:#f0a25a;--err:#ff6b6b}}
+:root{
+  --bg:#07080c;--bg2:#0d1017;--panel:rgba(255,255,255,.035);--panel2:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+  --fg:#f3f5f9;--mut:#8b93a3;--dim:#5b6372;
+  --a1:#4d7cff;--a2:#9b5cff;--a3:#22d3ee;--grad:linear-gradient(135deg,var(--a1),var(--a2));
+  --ok:#34d399;--warn:#fbbf24;--err:#f87171;--r:18px;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:760px;margin:0 auto;padding:28px 16px 120px}
-header h1{font-size:26px;margin:0}
-header p{color:var(--mut);margin:4px 0 22px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
-.card h2{font-size:18px;margin:0 0 4px}
-.card .lead{color:var(--mut);margin:0 0 10px;font-size:14px}
-button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:10px 18px;cursor:pointer}
-button.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-fg)}
-button:disabled{opacity:.45;cursor:default}
-.start{text-align:center;padding:36px 20px}
-.start p{color:var(--mut);margin:12px 0 0;font-size:14px}
-.start button{font-size:17px;padding:14px 28px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.stat{background:var(--soft);border-radius:10px;padding:12px}
-.stat>span{display:block;color:var(--mut);font-size:13px}
-.stat b{font-size:17px}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--mut);vertical-align:1px}
-.dot.on{background:var(--ok)}
-.set{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line)}
-.set:first-of-type{border-top:0}
-.set .txt{min-width:0}
-.set .name{font-weight:600}
-.set .help{color:var(--mut);font-size:14px}
-.set .ctl{flex:none;width:230px;display:flex;justify-content:flex-end;align-items:center;gap:10px}
-select{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg)}
-input[type=range]{flex:1;accent-color:var(--acc)}
-.val{min-width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-.sw{position:relative;width:50px;height:28px;flex:none}
-.sw input{opacity:0;width:0;height:0}
-.sw i{position:absolute;inset:0;background:var(--line);border-radius:28px;transition:.15s;cursor:pointer}
-.sw i:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s}
-.sw input:checked+i{background:var(--acc)}
-.sw input:checked+i:before{transform:translateX(22px)}
-.sw input:focus-visible+i{outline:2px solid var(--acc);outline-offset:2px}
-details summary{cursor:pointer;font-weight:600;font-size:18px;list-style:none}
-details summary::-webkit-details-marker{display:none}
-details summary:after{content:"▸";float:right;color:var(--mut)}
-details[open] summary:after{content:"▾"}
-details summary small{display:block;font-weight:400;font-size:14px;color:var(--mut)}
-details[open] summary{margin-bottom:10px}
-.remap{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 18px}
-.remap label{display:flex;align-items:center;gap:10px}
-.remap label span{width:96px;flex:none;font-weight:600}
-.remap select.changed{border-color:var(--acc);font-weight:600}
-.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px}
-.bar .in{max-width:760px;margin:0 auto;display:flex;gap:12px;align-items:center}
-#msg{flex:1;font-size:14px}
-.ok{color:var(--ok)}.err{color:var(--err)}.warn{color:var(--warn)}
+html{color-scheme:dark}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.5 Inter,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:-20% -10% auto;height:70vh;pointer-events:none;z-index:0;
+  background:radial-gradient(40% 60% at 25% 30%,rgba(77,124,255,.22),transparent 70%),radial-gradient(35% 55% at 80% 20%,rgba(155,92,255,.18),transparent 70%)}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 20px 140px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.02em;font-size:18px}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 24px rgba(77,124,255,.45)}
+.logo svg{width:20px;height:20px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--mut)}
+.pill .d{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.pill.on{color:var(--fg)}.pill.on .d{background:var(--ok);box-shadow:0 0 0 4px rgba(52,211,153,.18)}
+
+/* hero / connect */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:60px 0 40px}
+.hero h1{font-size:clamp(36px,5.4vw,60px);line-height:1.02;letter-spacing:-.045em;margin:0 0 18px;font-weight:800}
+.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);font-size:17px;max-width:460px;margin:0 0 30px}
+.cta{display:inline-flex;align-items:center;gap:10px;border:0;cursor:pointer;font:600 16px Inter,sans-serif;color:#fff;padding:16px 26px;border-radius:14px;background:var(--grad);box-shadow:0 10px 40px rgba(77,124,255,.4),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .15s,box-shadow .15s}
+.cta:hover{transform:translateY(-1px);box-shadow:0 14px 50px rgba(77,124,255,.55),inset 0 1px 0 rgba(255,255,255,.25)}
+.cta:disabled{opacity:.4;cursor:default;transform:none}
+.steps{display:flex;gap:22px;margin-top:30px;color:var(--mut);font-size:13px;flex-wrap:wrap}
+.steps b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);color:var(--fg);font-size:12px;margin-right:8px}
+.hint{margin-top:18px;font-size:14px;min-height:1.5em}
+.pad{width:100%;max-width:420px;justify-self:center;filter:drop-shadow(0 30px 60px rgba(77,124,255,.25))}
+
+/* dashboard */
+.dash{display:grid;grid-template-columns:300px 1fr;gap:20px;margin-top:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(12px)}
+.status{padding:26px;display:flex;flex-direction:column;gap:22px;position:sticky;top:20px;align-self:start}
+.ring{position:relative;width:180px;height:180px;margin:4px auto 0}
+.ring svg{transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .pct{font-size:42px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.ring .lbl{color:var(--mut);font-size:13px;margin-top:6px}
+.kv{display:grid;gap:12px}
+.kv div{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.kv span{color:var(--mut)}
+.bars{display:inline-flex;gap:3px;align-items:flex-end;height:16px;margin-right:8px;vertical-align:-2px}
+.bars i{width:4px;border-radius:2px;background:var(--line2)}
+.bars i:nth-child(1){height:25%}.bars i:nth-child(2){height:50%}.bars i:nth-child(3){height:75%}.bars i:nth-child(4){height:100%}
+.bars i.on{background:var(--a3)}
+.chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--panel2);color:var(--dim);margin-left:4px}
+.chip.on{background:rgba(34,211,238,.14);color:var(--a3)}
+.fw{font-size:12px;color:var(--dim);text-align:center;border-top:1px solid var(--line);padding-top:16px}
+
+.tabs{display:flex;gap:4px;padding:5px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.tab{flex:1;white-space:nowrap;border:0;background:none;color:var(--mut);font:600 14px Inter,sans-serif;padding:11px 16px;border-radius:12px;cursor:pointer;transition:.15s}
+.tab:hover{color:var(--fg)}
+.tab.on{background:var(--panel2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line2)}
+.sec{padding:8px 26px}
+.sec-h{padding:22px 0 8px;display:flex;align-items:center;gap:14px}
+.ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line)}
+.ico svg{width:20px;height:20px;stroke:var(--fg)}
+.sec-h h2{margin:0;font-size:19px;letter-spacing:-.02em}
+.sec-h p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-top:1px solid var(--line)}
+.sec-h+.row{border-top:0}
+.row .t{min-width:0}
+.row .n{font-weight:600}
+.row .h{color:var(--mut);font-size:13px;margin-top:2px}
+.ctl{flex:none;width:300px;display:flex;justify-content:flex-end;align-items:center;gap:14px}
+
+/* switch */
+.sw{position:relative;width:48px;height:28px;flex:none;cursor:pointer}
+.sw input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.1);transition:.2s;pointer-events:none}
+.sw i:before{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:.2s}
+.sw input:checked+i{background:var(--grad)}
+.sw input:checked+i:before{transform:translateX(20px)}
+.sw input:focus-visible+i{outline:2px solid var(--a1);outline-offset:3px}
+/* segmented */
+.seg{display:flex;width:100%;padding:3px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.seg button{flex:1;border:0;background:none;color:var(--mut);font:600 13px Inter,sans-serif;padding:8px 6px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:.15s}
+.seg button:hover{color:var(--fg)}
+.seg button.on{background:var(--panel2);color:var(--fg);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 4px 14px rgba(0,0,0,.35)}
+/* slider */
+.rg{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--a1),var(--a2)) 0/var(--p,50%) 100% no-repeat,rgba(255,255,255,.1);outline:none}
+.rg::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.5);cursor:pointer}
+.rg::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff;cursor:pointer}
+.val{min-width:58px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+select{width:100%;font:500 14px Inter,sans-serif;padding:10px 12px;border-radius:11px;border:1px solid var(--line2);background:var(--bg2);color:var(--fg);cursor:pointer}
+
+/* remap */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:8px 0 24px}
+.btn{padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02);transition:.15s}
+.btn.chg{border-color:rgba(155,92,255,.55);background:rgba(155,92,255,.08)}
+.btn .k{font-weight:700;font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between}
+.btn .k small{color:var(--a2);font-weight:600}
+.btn select{padding:8px 10px;font-size:13px}
+.note{color:var(--dim);font-size:13px;padding:4px 0 22px}
+code{font:12px ui-monospace,Consolas,monospace;background:var(--panel2);padding:2px 6px;border-radius:6px;color:var(--fg)}
+
+/* save dock */
+.dock{position:fixed;left:50%;bottom:24px;transform:translate(-50%,140%);z-index:10;display:flex;align-items:center;gap:14px;padding:10px 10px 10px 20px;border-radius:16px;background:rgba(20,23,31,.88);border:1px solid var(--line2);backdrop-filter:blur(16px);box-shadow:0 20px 60px rgba(0,0,0,.6);transition:transform .3s cubic-bezier(.2,.9,.3,1.2);max-width:calc(100vw - 32px)}
+.dock.show{transform:translate(-50%,0)}
+.dock .m{font-size:14px;font-weight:500}
+.ghost{border:1px solid var(--line2);background:none;color:var(--fg);font:600 14px Inter,sans-serif;padding:10px 16px;border-radius:11px;cursor:pointer}
+.go{border:0;background:var(--grad);color:#fff;font:600 14px Inter,sans-serif;padding:10px 18px;border-radius:11px;cursor:pointer}
+.go:disabled,.ghost:disabled{opacity:.4;cursor:default}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
 .hidden{display:none!important}
-code{background:var(--soft);padding:1px 5px;border-radius:5px;font-size:14px}
-@media (max-width:600px){.set{flex-direction:column;align-items:stretch}.set .ctl{width:100%}}
+footer{text-align:center;color:var(--dim);font-size:12px;margin-top:40px}
+footer a{color:var(--mut)}
+
+@media (max-width:900px){.hero{grid-template-columns:1fr;padding-top:30px}.pad{max-width:320px;order:-1}.dash{grid-template-columns:1fr}.status{position:static}}
+@media (max-width:600px){.wrap{padding:0 16px 140px}.row{flex-direction:column;align-items:stretch;gap:12px}.ctl{width:100%}.sec{padding:4px 18px}.dock .m{display:none}}
 </style>
 </head>
 <body>
-<main>
-<header>
-  <h1>MiraLink-DS5</h1>
-  <p>Réglages du dongle DualSense, sans rien installer.</p>
-</header>
+<div class="wrap">
+<nav>
+  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M7 12h4M9 10v4M15 11h.01M17 13h.01"/><path d="M6.5 6h11a4 4 0 0 1 3.9 3.1l1 4.6a3 3 0 0 1-5.2 2.6L15.5 14h-7l-1.7 2.3a3 3 0 0 1-5.2-2.6l1-4.6A4 4 0 0 1 6.5 6z"/></svg></div>MiraLink</div>
+  <div class="pill" id="pill"><span class="d"></span><span id="pill-t">Non connecté</span></div>
+</nav>
 
-<div class="card start" id="start">
-  <button class="primary" id="connect">Connecter le Pico</button>
-  <p id="hint">Branche le Pico en USB, clique, puis choisis « DualSense » dans la fenêtre.<br>Ferme Steam et DSX s'ils sont ouverts.</p>
-  <p id="nohid" class="err hidden">Ce navigateur ne gère pas WebHID. Ouvre cette page dans Chrome ou Edge sur PC.</p>
-</div>
+<section class="hero" id="start">
+  <div>
+    <h1>Ta DualSense,<br><em>sans fil, sans limite.</em></h1>
+    <p>Règle ton dongle MiraLink-DS5 directement depuis le navigateur. Rien à installer.</p>
+    <button class="cta" id="connect"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v6M8 4v4M16 4v4M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg>Connecter le Pico</button>
+    <div class="steps"><span><b>1</b>Branche le Pico</span><span><b>2</b>Clique</span><span><b>3</b>Choisis « DualSense »</span></div>
+    <div class="hint" id="hint" style="color:var(--dim)">Fonctionne dans Chrome et Edge. Ferme Steam et DSX avant.</div>
+  </div>
+  <svg class="pad" viewBox="0 0 400 260" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b2030"/><stop offset="1" stop-color="#0e1119"/></linearGradient>
+      <linearGradient id="ga" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4d7cff"/><stop offset="1" stop-color="#9b5cff"/></linearGradient>
+    </defs>
+    <path d="M118 40h164c34 0 58 22 66 52l30 108c8 30-26 52-50 30l-42-42H114l-42 42c-24 22-58 0-50-30l30-108c8-30 32-52 66-52z" fill="url(#gb)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+    <rect x="150" y="62" width="100" height="56" rx="12" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.1)"/>
+    <path d="M160 62h80" stroke="url(#ga)" stroke-width="3" stroke-linecap="round"/>
+    <g fill="rgba(255,255,255,.14)"><rect x="92" y="96" width="14" height="40" rx="3"/><rect x="79" y="109" width="40" height="14" rx="3"/></g>
+    <g stroke="rgba(255,255,255,.35)" stroke-width="2.5"><circle cx="300" cy="96" r="9"/><circle cx="300" cy="136" r="9"/><circle cx="280" cy="116" r="9"/><circle cx="320" cy="116" r="9"/></g>
+    <circle cx="150" cy="160" r="22" fill="#0a0c12" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+    <circle cx="250" cy="160" r="22" fill="#0a0c12" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+    <circle cx="200" cy="150" r="7" fill="url(#ga)"/>
+  </svg>
+</section>
 
-<div id="ui" class="hidden">
-  <div class="card">
-    <h2>État</h2>
-    <p class="lead">Mis à jour toutes les 2 secondes.</p>
-    <div class="stats">
-      <div class="stat"><span>Manette</span><b id="s-conn">–</b></div>
-      <div class="stat"><span>Batterie</span><b id="s-bat">–</b></div>
-      <div class="stat"><span>Signal</span><b id="s-rssi">–</b></div>
-      <div class="stat"><span>Audio</span><b id="s-audio">–</b></div>
-      <div class="stat"><span>Firmware</span><b id="s-fw">–</b></div>
+<section class="dash hidden" id="ui">
+  <aside class="card status">
+    <div class="ring">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4d7cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+        <circle cx="90" cy="90" r="78" stroke="rgba(255,255,255,.07)" stroke-width="12" fill="none"/>
+        <circle id="arc" cx="90" cy="90" r="78" stroke="url(#rg)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="490" stroke-dashoffset="490" style="transition:stroke-dashoffset .8s"/>
+      </svg>
+      <div class="c"><div><div class="pct" id="s-pct">–</div><div class="lbl" id="s-bat">Batterie</div></div></div>
     </div>
-  </div>
-  <div id="groups"></div>
-  <div class="card">
-    <details>
-      <summary>Remap des boutons<small>Changer ce que fait chaque bouton.</small></summary>
-      <div class="remap" id="remap"></div>
-    </details>
-  </div>
-  <p class="lead" style="color:var(--mut);font-size:14px">Raccourcis clavier : <code>python tools/config_tool.py shortcut</code></p>
-</div>
-</main>
+    <div class="kv">
+      <div><span>Manette</span><b id="s-conn">–</b></div>
+      <div><span>Signal</span><b id="s-rssi">–</b></div>
+      <div><span>Audio</span><b id="s-audio">–</b></div>
+    </div>
+    <div class="fw" id="s-fw">–</div>
+  </aside>
 
-<div class="bar hidden" id="bar"><div class="in">
-  <div id="msg"></div>
-  <button id="reload">Annuler</button>
-  <button class="primary" id="save" disabled>Enregistrer</button>
-</div></div>
+  <div>
+    <div class="card tabs" id="tabs"></div>
+    <div class="card" id="panel"></div>
+  </div>
+</section>
+
+<footer>MiraLink-DS5 · fork de <a href="https://github.com/awalol/DS5Dongle">DS5Dongle</a> par awalol · <a href="https://github.com/LeParfait271/MiraLink-DS5">GitHub</a></footer>
+</div>
+
+<div class="dock" id="dock">
+  <span class="m" id="msg">Modifications non enregistrées</span>
+  <button class="ghost" id="reload">Annuler</button>
+  <button class="go" id="save">Enregistrer</button>
+</div>
 
 <script>
 "use strict";
@@ -110,7 +195,15 @@ const VID = 0x054C, PIDS = [0x0CE6, 0x0DF2];
 const R_SET = 0xF6, R_CFG = 0xF7, R_VER = 0xF8, R_STAT = 0xF9, R_REMAP = 0xFA, LEN = 63;
 const L = (o) => Object.entries(o).map(([v, l]) => [Number(v), l]);
 const SW = "switch";
-const AUDIO = L({0: "Automatique", 1: "Manette", 2: "Casque", 3: "Désactivé"});
+const AUDIO = L({0: "Auto", 1: "Manette", 2: "Casque", 3: "Off"});
+const I = {
+  pad: '<path d="M6.5 6h11a4 4 0 0 1 3.9 3.1l1 4.6a3 3 0 0 1-5.2 2.6L15.5 14h-7l-1.7 2.3a3 3 0 0 1-5.2-2.6l1-4.6A4 4 0 0 1 6.5 6z"/>',
+  snd: '<path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  pc: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  adv: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  btn: '<circle cx="12" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/>',
+};
+const icon = (k) => `<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg></div>`;
 
 // Binary layout: order and types MUST match Config_body (src/config.h).
 const LAYOUT = [
@@ -121,52 +214,51 @@ const LAYOUT = [
   ["lock_volume", "u8"], ["status_gpio_pin", "u8"], ["status_gpio_mode", "u8"], ["packet_mode", "u8"],
   ["disconnect_on_dock", "u8"], ["sleep_on_dock", "u8"], ["disable_touchpad", "u8"], ["symmetric_haptics", "u8"],
 ];
-
-// Display: [field, control, label, help]. control = SW | options list | {min,max,step,fmt}
-const GROUPS = [
-  {title: "Manette", items: [
-    ["haptics_gain", {min: 1, max: 2, step: 0.05, fmt: (v) => "×" + v.toFixed(2)}, "Force des vibrations", "×1 = normal, ×2 = double."],
-    ["symmetric_haptics", SW, "Vibrations symétriques", "Même vibration à gauche et à droite."],
-    ["trigger_reduce", {min: 0, max: 10, fmt: (v) => v ? String(v) : "Auto"}, "Réduction des gâchettes", "Adoucit la résistance des gâchettes adaptatives."],
-    ["disable_touchpad", SW, "Désactiver le pavé tactile", "Le PC ne voit plus le pavé ni son clic."],
-    ["inactive_time", {min: 0, max: 60, fmt: (v) => v ? v + " min" : "Jamais"}, "Extinction automatique", "Éteint la manette sans utilisation."],
+const pct = (max) => (v) => Math.round(v / max * 100) + " %";
+const TABS = [
+  {id: "pad", title: "Manette", sub: "Vibrations, gâchettes et pavé tactile", items: [
+    ["haptics_gain", {min: 1, max: 2, step: 0.05, fmt: (v) => "×" + v.toFixed(2)}, "Intensité des vibrations", "×1 normal · ×2 double"],
+    ["symmetric_haptics", SW, "Vibrations symétriques", "Même ressenti à gauche et à droite"],
+    ["trigger_reduce", {min: 0, max: 10, fmt: (v) => v ? "−" + v : "Auto"}, "Résistance des gâchettes", "Adoucit les gâchettes adaptatives"],
+    ["disable_touchpad", SW, "Désactiver le pavé tactile", "Le PC ne voit plus le pavé ni son clic"],
+    ["inactive_time", {min: 0, max: 60, fmt: (v) => v ? v + " min" : "Jamais"}, "Extinction automatique", "Éteint la manette inutilisée"],
   ]},
-  {title: "Son", items: [
-    ["speaker_select", AUDIO, "Sortie son", "Où joue le son du PC."],
-    ["mic_select", AUDIO, "Micro", "Quel micro utiliser."],
-    ["speaker_volume", {min: 0, max: 127}, "Volume haut-parleur", ""],
-    ["headset_volume", {min: 0, max: 127}, "Volume casque", ""],
-    ["lock_volume", L({0: "Non", 1: "Volume des jeux", 2: "Volume Windows"}), "Bloquer le volume", "Empêche le PC de changer le volume."],
+  {id: "snd", title: "Son", sub: "Haut-parleur, casque et micro", items: [
+    ["speaker_select", AUDIO, "Sortie audio", "Où joue le son du PC"],
+    ["mic_select", AUDIO, "Micro", "Quel micro utiliser"],
+    ["speaker_volume", {min: 0, max: 127, fmt: pct(127)}, "Volume haut-parleur", ""],
+    ["headset_volume", {min: 0, max: 127, fmt: pct(127)}, "Volume casque", ""],
+    ["lock_volume", L({0: "Non", 1: "Jeux", 2: "Windows"}), "Verrouiller le volume", "Empêche le PC de le modifier"],
   ]},
-  {title: "PC et Pico", items: [
+  {id: "pc", title: "PC & Pico", sub: "Veille, réveil et réactivité", items: [
+    ["polling_rate_mode", L({0: "250", 1: "500", 2: "1000", 3: "Max"}), "Fréquence (Hz)", "Plus haut = moins de latence"],
     ["enable_wake", SW, "Réveiller le PC avec PS", ""],
-    ["sleep_on_dock", SW, "Veille du PC sur le socle", "Le PC se met en veille quand la manette est posée sur son socle."],
-    ["disconnect_on_dock", SW, "Déconnecter sur le socle", "Coupe le Bluetooth quand la manette charge sur son socle."],
+    ["sleep_on_dock", SW, "Veille du PC sur le socle", "Quand la manette est posée sur son socle"],
+    ["disconnect_on_dock", SW, "Déconnecter sur le socle", "Coupe le Bluetooth pendant la charge"],
     ["disable_pico_led", SW, "Éteindre la LED du Pico", ""],
-    ["polling_rate_mode", L({0: "250 Hz", 1: "500 Hz", 2: "1000 Hz", 3: "Temps réel"}), "Fréquence", "Plus haut = moins de latence."],
   ]},
-  {title: "Avancé", fold: true, sub: "À ne toucher qu'en cas de problème.", items: [
-    ["enable_usb_sn", SW, "Numéro de série USB", "Garde activé : nécessaire aux gâchettes adaptatives dans certains jeux."],
-    ["controller_mode", L({0: "DualSense", 1: "DualSense Edge", 2: "Automatique"}), "Type de manette annoncé", ""],
-    ["enable_keyboard", SW, "Clavier USB", "Nécessaire pour les raccourcis clavier."],
-    ["audio_buffer_length", {min: 16, max: 128}, "Tampon audio", "Plus grand = moins de coupures, plus de latence."],
+  {id: "adv", title: "Avancé", sub: "À modifier seulement en cas de problème", items: [
+    ["enable_usb_sn", SW, "Numéro de série USB", "Garde activé : requis pour les gâchettes adaptatives"],
+    ["controller_mode", L({0: "DS5", 1: "Edge", 2: "Auto"}), "Manette annoncée", "DualSense ou DualSense Edge"],
+    ["enable_keyboard", SW, "Clavier USB", "Requis pour les raccourcis clavier"],
+    ["audio_buffer_length", {min: 16, max: 128}, "Tampon audio", "Plus grand = moins de coupures"],
     ["speaker_gain", {min: 0, max: 7}, "Pré-gain haut-parleur", ""],
     ["packet_mode", L({0: "Double", 1: "Simple"}), "Paquets Bluetooth", ""],
-    ["status_gpio_pin", {min: 0, max: 255, fmt: (v) => v === 255 ? "Off" : "GP" + v}, "Broche GPIO d'état", "255 = désactivé."],
-    ["status_gpio_mode", L({0: "Allumé si connecté", 1: "Impulsion 200 ms"}), "Mode GPIO", ""],
+    ["status_gpio_pin", {min: 0, max: 255, fmt: (v) => v === 255 ? "Off" : "GP" + v}, "Broche GPIO d'état", "255 = désactivée"],
+    ["status_gpio_mode", L({0: "Continu", 1: "Impulsion"}), "Mode GPIO", ""],
   ]},
+  {id: "btn", title: "Boutons", sub: "Change l'action de chaque bouton", remap: true},
 ];
 const RESTART = new Set(["enable_usb_sn", "controller_mode", "enable_keyboard"]);
-const BUTTONS = ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖", "Carré", "Croix", "Rond", "Triangle", "L1", "R1",
-  "L2", "R2", "Create", "Options", "L3", "R3", "PS", "Pavé", "Mute", "Fn gauche", "Fn droite",
-  "Palette G", "Palette D", "Désactivé"];
+const BUTTONS = ["Haut", "Haut-droite", "Droite", "Bas-droite", "Bas", "Bas-gauche", "Gauche", "Haut-gauche",
+  "Carré", "Croix", "Rond", "Triangle", "L1", "R1", "L2", "R2", "Create", "Options", "L3", "R3", "PS",
+  "Pavé tactile", "Mute", "Fn gauche", "Fn droite", "Palette G", "Palette D", "Désactivé"];
 const SRC = BUTTONS.length - 1, COMBO = BUTTONS.length;
-const POWER = {0: "", 1: " ⚡", 2: " ✓"};
 
-let dev = null, cfg = {}, saved = {}, remap = [], savedRemap = [], timer = null;
+let dev = null, cfg = {}, saved = {}, remap = [], savedRemap = [], timer = null, tab = "pad";
 const $ = (id) => document.getElementById(id);
-const msg = (t, c = "") => { $("msg").textContent = t; $("msg").className = c; };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function msg(t, c = "") { $("msg").textContent = t; $("msg").className = "m " + c; }
 
 async function getReport(id) {
   const dv = await dev.receiveFeatureReport(id);
@@ -193,58 +285,76 @@ function pack(c) {
 }
 const changedKeys = () => LAYOUT.map((f) => f[0]).filter((k) => Math.abs(cfg[k] - saved[k]) > 1e-4);
 const dirty = () => changedKeys().length > 0 || remap.some((v, i) => v !== savedRemap[i]);
-function refreshBar() {
-  const d = dirty(); $("save").disabled = !d; $("reload").disabled = !d;
-  if (d) msg("Modifications non enregistrées", "warn");
+function refreshDock() {
+  const d = dirty();
+  $("dock").classList.toggle("show", d);
+  $("save").disabled = $("reload").disabled = !d;
+  if (d) msg("Modifications non enregistrées");
 }
+function flash(t, c) { msg(t, c); $("dock").classList.add("show"); $("save").disabled = $("reload").disabled = true;
+  setTimeout(() => { if (!dirty()) $("dock").classList.remove("show"); }, 3200); }
 
 function control(name, spec) {
-  const wrap = document.createElement("div"); wrap.className = "ctl";
-  const set = (v) => { cfg[name] = v; refreshBar(); };
+  const w = document.createElement("div"); w.className = "ctl";
+  const set = (v) => { cfg[name] = v; refreshDock(); };
   if (spec === SW) {
-    wrap.innerHTML = `<label class="sw"><input type="checkbox" aria-label="${name}"><i></i></label>`;
-    const cb = wrap.querySelector("input"); cb.checked = !!cfg[name];
+    w.innerHTML = '<label class="sw"><input type="checkbox"><i></i></label>';
+    const cb = w.querySelector("input"); cb.checked = !!cfg[name];
     cb.onchange = () => set(cb.checked ? 1 : 0);
   } else if (Array.isArray(spec)) {
-    const s = document.createElement("select");
-    for (const [v, l] of spec) s.add(new Option(l, v));
-    s.value = cfg[name]; s.onchange = () => set(Number(s.value)); wrap.append(s);
+    const s = document.createElement("div"); s.className = "seg";
+    for (const [v, l] of spec) {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = l;
+      b.classList.toggle("on", cfg[name] === v);
+      b.onclick = () => { s.querySelectorAll("button").forEach((x) => x.classList.remove("on")); b.classList.add("on"); set(v); };
+      s.append(b);
+    }
+    w.append(s);
   } else {
     const r = document.createElement("input"), out = document.createElement("span");
-    r.type = "range"; r.min = spec.min; r.max = spec.max; r.step = spec.step || 1; out.className = "val";
+    r.type = "range"; r.className = "rg"; r.min = spec.min; r.max = spec.max; r.step = spec.step || 1; out.className = "val";
     const fmt = spec.fmt || String;
+    const paint = (v) => { out.textContent = fmt(v); r.style.setProperty("--p", ((v - spec.min) / (spec.max - spec.min) * 100) + "%"); };
     const v0 = Math.min(spec.max, Math.max(spec.min, cfg[name]));
-    r.value = v0; out.textContent = fmt(Number(v0));
-    r.oninput = () => { const v = Number(r.value); out.textContent = fmt(v); set(v); };
-    wrap.append(r, out);
+    r.value = v0; paint(Number(v0));
+    r.oninput = () => { const v = Number(r.value); paint(v); set(v); };
+    w.append(r, out);
   }
-  return wrap;
+  return w;
 }
-function render() {
-  const box = $("groups"); box.innerHTML = "";
-  for (const g of GROUPS) {
-    const card = document.createElement("div"); card.className = "card";
-    let body = card;
-    if (g.fold) {
-      const d = document.createElement("details");
-      d.innerHTML = `<summary>${g.title}<small>${g.sub}</small></summary>`;
-      card.append(d); body = d;
-    } else card.innerHTML = `<h2>${g.title}</h2>`;
-    for (const [name, spec, label, help] of g.items) {
-      const row = document.createElement("div"); row.className = "set";
-      row.innerHTML = `<div class="txt"><div class="name">${label}</div>${help ? `<div class="help">${help}</div>` : ""}</div>`;
-      row.append(control(name, spec)); body.append(row);
-    }
-    box.append(card);
+function renderTabs() {
+  $("tabs").innerHTML = "";
+  for (const t of TABS) {
+    const b = document.createElement("button"); b.className = "tab" + (t.id === tab ? " on" : ""); b.textContent = t.title;
+    b.onclick = () => { tab = t.id; renderTabs(); renderPanel(); };
+    $("tabs").append(b);
   }
-  const rb = $("remap"); rb.innerHTML = "";
-  for (let s = 0; s < SRC; s++) {
-    const lab = document.createElement("label"), sel = document.createElement("select");
-    BUTTONS.forEach((n, i) => sel.add(new Option(i === s ? "Normal" : n, i)));
-    sel.add(new Option("PS + R2 (capture)", COMBO));
-    sel.value = remap[s]; sel.classList.toggle("changed", remap[s] !== s);
-    sel.onchange = () => { remap[s] = Number(sel.value); sel.classList.toggle("changed", remap[s] !== s); refreshBar(); };
-    lab.innerHTML = `<span>${BUTTONS[s]}</span>`; lab.append(sel); rb.append(lab);
+}
+function renderPanel() {
+  const t = TABS.find((x) => x.id === tab), p = $("panel");
+  p.innerHTML = `<div class="sec"><div class="sec-h">${icon(t.id)}<div><h2>${t.title}</h2><p>${t.sub}</p></div></div></div>`;
+  const sec = p.firstChild;
+  if (t.remap) {
+    const g = document.createElement("div"); g.className = "grid";
+    for (let s = 0; s < SRC; s++) {
+      const c = document.createElement("div"), sel = document.createElement("select");
+      BUTTONS.forEach((n, i) => sel.add(new Option(i === s ? "Par défaut" : n, i)));
+      sel.add(new Option("PS + R2 (capture)", COMBO));
+      sel.value = remap[s];
+      const paint = () => { const ch = remap[s] !== s; c.className = "btn" + (ch ? " chg" : "");
+        c.querySelector("small").textContent = ch ? "modifié" : ""; };
+      c.innerHTML = `<div class="k">${BUTTONS[s]}<small></small></div>`; c.append(sel); paint();
+      sel.onchange = () => { remap[s] = Number(sel.value); paint(); refreshDock(); };
+      g.append(c);
+    }
+    sec.append(g);
+    sec.insertAdjacentHTML("beforeend", '<div class="note">Raccourcis clavier : <code>python tools/config_tool.py shortcut</code></div>');
+    return;
+  }
+  for (const [name, spec, label, help] of t.items) {
+    const r = document.createElement("div"); r.className = "row";
+    r.innerHTML = `<div class="t"><div class="n">${label}</div>${help ? `<div class="h">${help}</div>` : ""}</div>`;
+    r.append(control(name, spec)); sec.append(r);
   }
 }
 
@@ -254,26 +364,40 @@ async function readStatus() {
     const u = await getReport(R_STAT);
     const flags = u.length >= 2 && (u[1] & 0x80) ? u[1] : null;
     const conn = flags === null ? null : !!(flags & 4);
-    $("s-conn").innerHTML = conn === null ? "?" : `<span class="dot${conn ? " on" : ""}"></span>${conn ? "Connectée" : "Éteinte"}`;
+    $("pill").classList.toggle("on", !!conn);
+    $("pill-t").textContent = conn ? "Manette connectée" : "Pico connecté";
+    $("s-conn").textContent = conn === null ? "?" : conn ? "Connectée" : "Éteinte";
     const rssi = u.length ? (u[0] << 24 >> 24) : null;
-    $("s-rssi").textContent = !conn || rssi === null ? "–" : rssi > -60 ? "Bon" : rssi > -75 ? "Moyen" : "Faible";
-    $("s-rssi").title = rssi === null ? "" : rssi + " dBm";
+    if (conn && rssi !== null) {
+      const n = rssi > -55 ? 4 : rssi > -65 ? 3 : rssi > -78 ? 2 : 1;
+      $("s-rssi").innerHTML = `<span class="bars">${[1, 2, 3, 4].map((i) => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>${rssi} dBm`;
+    } else $("s-rssi").textContent = "–";
+    let p = null, lbl = conn ? "Batterie" : "Manette éteinte";
     if (conn && u.length >= 3 && u[2] !== 0xFF) {
-      const st = u[2] >> 4, pct = st === 2 ? 100 : Math.min(u[2] & 15, 10) * 10;
-      $("s-bat").textContent = `${pct} %${POWER[st] ?? " ⚠"}`;
-    } else $("s-bat").textContent = u.length < 3 && conn ? "Firmware ancien" : "–";
-    $("s-audio").textContent = flags === null ? "?" :
-      [flags & 2 ? "Son" : "", flags & 1 ? "Micro" : ""].filter(Boolean).join(" + ") || "Inactif";
+      const st = u[2] >> 4; p = st === 2 ? 100 : Math.min(u[2] & 15, 10) * 10;
+      lbl = {0: "Sur batterie", 1: "En charge ⚡", 2: "Chargée"}[st] || "Anomalie batterie";
+    } else if (conn && u.length < 3) lbl = "Mets à jour le firmware";
+    $("s-pct").textContent = p === null ? "–" : p + "%";
+    $("s-bat").textContent = lbl;
+    $("arc").style.strokeDashoffset = 490 - 490 * (p || 0) / 100;
+    $("arc").style.stroke = p !== null && p <= 20 ? "#f87171" : "url(#rg)";
+    $("s-audio").innerHTML = flags === null ? "?" :
+      `<span class="chip${flags & 2 ? " on" : ""}">Son</span><span class="chip${flags & 1 ? " on" : ""}">Micro</span>`;
   } catch (e) { /* retried on next tick */ }
 }
 
 async function loadAll() {
-  $("s-fw").textContent = new TextDecoder().decode(await getReport(R_VER)).replace(/\0.*$/s, "") || "?";
+  const fw = new TextDecoder().decode(await getReport(R_VER)).replace(/\0.*$/s, "") || "?";
+  $("s-fw").textContent = "Firmware " + fw;
   const c = await getReport(R_CFG);
   if (c.length < 24) throw new Error("réponse de config trop courte");
   cfg = unpack(c); saved = {...cfg};
   remap = Array.from((await getReport(R_REMAP)).slice(0, SRC + 1)); savedRemap = [...remap];
-  render(); await readStatus(); refreshBar();
+  renderTabs(); renderPanel(); await readStatus(); refreshDock();
+}
+function showUI(on) {
+  $("start").classList.toggle("hidden", on); $("ui").classList.toggle("hidden", !on);
+  if (!on) { $("dock").classList.remove("show"); $("pill").classList.remove("on"); $("pill-t").textContent = "Non connecté"; }
 }
 
 $("connect").onclick = async () => {
@@ -281,15 +405,13 @@ $("connect").onclick = async () => {
     const list = await navigator.hid.requestDevice({filters: PIDS.map((productId) => ({vendorId: VID, productId, usagePage: 1, usage: 5}))});
     if (!list.length) return;
     dev = list[0]; if (!dev.opened) await dev.open();
-    await loadAll();
-    $("start").classList.add("hidden"); $("ui").classList.remove("hidden"); $("bar").classList.remove("hidden");
-    msg("Pico connecté", "ok");
+    await loadAll(); showUI(true);
     clearInterval(timer); timer = setInterval(readStatus, 2000);
   } catch (e) {
-    $("hint").innerHTML = `<span class="err">Impossible d'ouvrir le Pico (${e.message}).</span><br>Ferme Steam et DSX, débranche/rebranche le Pico et réessaie.`;
+    $("hint").innerHTML = `<span class="err">Impossible d'ouvrir le Pico (${e.message}).</span> Ferme Steam et DSX, rebranche le Pico et réessaie.`;
   }
 };
-$("reload").onclick = () => { cfg = {...saved}; remap = [...savedRemap]; render(); refreshBar(); msg("Modifications annulées"); };
+$("reload").onclick = () => { cfg = {...saved}; remap = [...savedRemap]; renderPanel(); refreshDock(); };
 $("save").onclick = async () => {
   const restart = changedKeys().some((k) => RESTART.has(k));
   $("save").disabled = $("reload").disabled = true;
@@ -300,15 +422,17 @@ $("save").onclick = async () => {
     await setReport(R_REMAP, new Uint8Array(remap));
     await setReport(R_SET, new Uint8Array([0x02]));
     await loadAll();
-    msg(restart ? "Enregistré. Débranche et rebranche le Pico pour appliquer." : "Enregistré ✓", restart ? "warn" : "ok");
-  } catch (e) { msg("Échec de l'enregistrement : " + e.message, "err"); refreshBar(); }
+    flash(restart ? "Enregistré · rebranche le Pico pour appliquer" : "Enregistré ✓", restart ? "warn" : "ok");
+  } catch (e) { msg("Échec : " + e.message, "err"); $("save").disabled = $("reload").disabled = false; }
 };
-if (!("hid" in navigator)) { $("nohid").classList.remove("hidden"); $("hint").classList.add("hidden"); $("connect").disabled = true; }
+if (!("hid" in navigator)) {
+  $("connect").disabled = true;
+  $("hint").innerHTML = '<span class="err">Ce navigateur ne gère pas WebHID.</span> Ouvre cette page dans Chrome ou Edge sur PC.';
+}
 navigator.hid?.addEventListener("disconnect", (e) => {
   if (e.device !== dev) return;
-  dev = null; clearInterval(timer);
-  $("ui").classList.add("hidden"); $("bar").classList.add("hidden"); $("start").classList.remove("hidden");
-  $("hint").innerHTML = '<span class="warn">Pico débranché.</span> Rebranche-le puis clique sur « Connecter ».';
+  dev = null; clearInterval(timer); showUI(false);
+  $("hint").innerHTML = '<span class="warn">Pico débranché.</span> Rebranche-le puis clique sur « Connecter le Pico ».';
 });
 </script>
 </body>
