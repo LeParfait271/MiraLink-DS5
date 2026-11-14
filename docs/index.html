@@ -355,46 +355,47 @@ function renderTabs() {
 // DualSense-style illustration (viewBox 0 0 400 280): white shell, black core, wide touchpad, light bars.
 function padArt(full, uid) {
   const u = uid || "p";
-  const shell = "M104 46C140 36 260 36 296 46C330 55 352 82 364 130C378 186 392 232 372 256C352 278 316 270 298 246L268 208H132L102 246C84 270 48 278 28 256C8 232 22 186 36 130C48 82 70 55 104 46Z";
-  const core = "M120 50C150 43 250 43 280 50C296 55 306 68 310 84L296 196C293 212 281 222 265 222H135C119 222 107 212 104 196L90 84C94 68 104 55 120 50Z";
+  const shell = "M92 50C122 38 278 38 308 50C346 60 368 88 379 134C393 192 403 236 381 260C359 282 321 272 303 248L276 214H124L97 248C79 272 41 282 19 260C-3 236 7 192 21 134C32 88 54 60 92 50Z";
+  const core = "M126 58H274L290 100L279 199C277 210 268 217 256 217H144C132 217 123 210 121 199L110 100Z";
+  const pad = "M142 44H258C265 44 269 49 268 56L261 108C260 116 254 122 246 122H154C146 122 140 116 139 108L132 56C131 49 135 44 142 44Z";
   let s = `<defs>
-  <linearGradient id="${u}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f8fb"/><stop offset=".6" stop-color="#e2e6ee"/><stop offset="1" stop-color="#b9c0cd"/></linearGradient>
-  <linearGradient id="${u}k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#232733"/><stop offset="1" stop-color="#0b0d12"/></linearGradient>
-  <linearGradient id="${u}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfcfe"/><stop offset="1" stop-color="#d7dce5"/></linearGradient>
-  <linearGradient id="${u}l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7aa2ff"/><stop offset="1" stop-color="#2f5bff"/></linearGradient>
+  <linearGradient id="${u}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8f9fc"/><stop offset=".6" stop-color="#e3e7ee"/><stop offset="1" stop-color="#b8bfcc"/></linearGradient>
+  <linearGradient id="${u}k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262a35"/><stop offset="1" stop-color="#0b0d12"/></linearGradient>
+  <linearGradient id="${u}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfdff"/><stop offset="1" stop-color="#d9dee7"/></linearGradient>
+  <linearGradient id="${u}l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb0ff"/><stop offset="1" stop-color="#2f5bff"/></linearGradient>
   <radialGradient id="${u}s" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#3a3f4d"/><stop offset=".7" stop-color="#14171f"/><stop offset="1" stop-color="#07080c"/></radialGradient>
-  <radialGradient id="${u}g" cx=".3" cy="0" r="1"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="${u}g" cx=".3" cy="0" r="1"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></radialGradient>
   <filter id="${u}f" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
 </defs>
-<ellipse cx="200" cy="266" rx="160" ry="10" fill="#000" opacity=".55" filter="url(#${u}f)"/>
-<path d="M80 50C84 36 98 28 114 28H132C140 28 143 35 140 44Z" fill="#14171e" stroke="rgba(255,255,255,.12)"/>
-<path d="M320 50C316 36 302 28 286 28H268C260 28 257 35 260 44Z" fill="#14171e" stroke="rgba(255,255,255,.12)"/>
-<path d="${shell}" fill="url(#${u}w)" stroke="rgba(0,0,0,.25)" stroke-width="1"/>
-<path d="${shell}" fill="url(#${u}g)" opacity=".6"/>
+<ellipse cx="200" cy="268" rx="170" ry="9" fill="#000" opacity=".55" filter="url(#${u}f)"/>
+<path d="M74 52C78 36 94 28 110 28H130C138 28 142 34 140 44Z" fill="#15181f" stroke="rgba(255,255,255,.12)"/>
+<path d="M326 52C322 36 306 28 290 28H270C262 28 258 34 260 44Z" fill="#15181f" stroke="rgba(255,255,255,.12)"/>
+<path d="${shell}" fill="url(#${u}w)" stroke="rgba(0,0,0,.22)"/>
+<path d="${shell}" fill="url(#${u}g)" opacity=".55"/>
 <path d="${core}" fill="url(#${u}k)"/>
-<path class="led" d="M132 52C127 70 130 100 140 118M268 52C273 70 270 100 260 118" stroke="url(#${u}l)" stroke-width="8" stroke-linecap="round" opacity=".55" filter="url(#${u}f)"/>
-<path class="led" d="M132 52C127 70 130 100 140 118M268 52C273 70 270 100 260 118" stroke="url(#${u}l)" stroke-width="2.5" stroke-linecap="round"/>
-<path d="M144 46H256C263 46 267 51 266 58L259 112C258 120 252 126 244 126H156C148 126 142 120 141 112L134 58C133 51 137 46 144 46Z" fill="url(#${u}t)" stroke="rgba(0,0,0,.15)"/>`;
+<path class="led" d="M127 54C122 72 124 98 132 116M273 54C278 72 276 98 268 116" stroke="url(#${u}l)" stroke-width="8" stroke-linecap="round" opacity=".55" filter="url(#${u}f)"/>
+<path class="led" d="M127 54C122 72 124 98 132 116M273 54C278 72 276 98 268 116" stroke="url(#${u}l)" stroke-width="2.5" stroke-linecap="round"/>
+<path d="${pad}" fill="url(#${u}t)" stroke="rgba(0,0,0,.15)"/>`;
   if (!full) return s;
   s += `
-<g fill="#cfd5df" stroke="rgba(0,0,0,.18)">
-  <path d="M80 86h12a3 3 0 0 1 3 3v13l-9 8-9-8V89a3 3 0 0 1 3-3z"/><path d="M80 146h12a3 3 0 0 0 3-3v-13l-9-8-9 8v13a3 3 0 0 0 3 3z"/>
-  <path d="M56 110v12a3 3 0 0 0 3 3h13l8-9-8-9H59a3 3 0 0 0-3 3z"/><path d="M116 110v12a3 3 0 0 1-3 3h-13l-8-9 8-9h13a3 3 0 0 1 3 3z"/>
+<g fill="#d3d8e1" stroke="rgba(0,0,0,.2)">
+  <path d="M64 84h12a3 3 0 0 1 3 3v13l-9 8-9-8V87a3 3 0 0 1 3-3z"/><path d="M64 140h12a3 3 0 0 0 3-3v-13l-9-8-9 8v13a3 3 0 0 0 3 3z"/>
+  <path d="M42 106v12a3 3 0 0 0 3 3h13l8-9-8-9H45a3 3 0 0 0-3 3z"/><path d="M98 106v12a3 3 0 0 1-3 3H82l-8-9 8-9h13a3 3 0 0 1 3 3z"/>
 </g>
-<g fill="rgba(40,46,60,.12)" stroke="rgba(0,0,0,.22)" stroke-width="1.2">
-  <circle cx="314" cy="94" r="12"/><circle cx="314" cy="138" r="12"/><circle cx="292" cy="116" r="12"/><circle cx="336" cy="116" r="12"/>
+<g fill="rgba(40,46,60,.1)" stroke="rgba(0,0,0,.22)" stroke-width="1.2">
+  <circle cx="330" cy="90" r="12"/><circle cx="330" cy="134" r="12"/><circle cx="308" cy="112" r="12"/><circle cx="352" cy="112" r="12"/>
 </g>
 <g fill="none" stroke="#8a93a3" stroke-width="1.8" stroke-linejoin="round">
-  <path d="M314 88l6 10h-12z"/><path d="M309.5 133.5l9 9M318.5 133.5l-9 9"/><rect x="287" y="111" width="10" height="10"/><circle cx="336" cy="116" r="5.5"/>
+  <path d="M330 84l6 10h-12z"/><path d="M325.5 129.5l9 9M334.5 129.5l-9 9"/><rect x="303" y="107" width="10" height="10"/><circle cx="352" cy="112" r="5.5"/>
 </g>
-<rect x="124" y="56" width="5" height="15" rx="2.5" fill="#9aa2b0"/><rect x="271" y="56" width="5" height="15" rx="2.5" fill="#9aa2b0"/>
-<g fill="#3a3f4c">${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${185 + i * 6}" cy="140" r="1.3"/><circle cx="${188 + i * 6}" cy="145" r="1.3"/>`).join("").replace(/<circle cx="221" cy="145" r="1.3"\/>/, "")}</g>
-<g><circle cx="155" cy="170" r="27" fill="#050608"/><circle cx="155" cy="170" r="21" fill="url(#${u}s)" stroke="rgba(255,255,255,.1)"/><circle cx="155" cy="170" r="13" fill="none" stroke="rgba(255,255,255,.07)"/></g>
-<g><circle cx="245" cy="170" r="27" fill="#050608"/><circle cx="245" cy="170" r="21" fill="url(#${u}s)" stroke="rgba(255,255,255,.1)"/><circle cx="245" cy="170" r="13" fill="none" stroke="rgba(255,255,255,.07)"/></g>
-<circle cx="200" cy="170" r="9" fill="#1b1e26" stroke="rgba(255,255,255,.18)"/>
-<circle cx="200" cy="170" r="4" fill="none" stroke="#8a93a3" stroke-width="1.4"/>
-<rect x="190" y="188" width="20" height="6" rx="3" fill="#2a2e38"/>
-<circle class="led" cx="200" cy="191" r="1.6" fill="#ff8a65"/>`;
+<rect x="113" y="60" width="5" height="15" rx="2.5" fill="#8f98a7"/><rect x="282" y="60" width="5" height="15" rx="2.5" fill="#8f98a7"/>
+<g fill="#454b59">${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${185 + i * 6}" cy="136" r="1.3"/>`).join("")}${[0, 1, 2, 3, 4].map((i) => `<circle cx="${188 + i * 6}" cy="141" r="1.3"/>`).join("")}</g>
+<g><circle cx="160" cy="168" r="27" fill="#050608"/><circle cx="160" cy="168" r="21" fill="url(#${u}s)" stroke="rgba(255,255,255,.1)"/><circle cx="160" cy="168" r="13" fill="none" stroke="rgba(255,255,255,.07)"/></g>
+<g><circle cx="240" cy="168" r="27" fill="#050608"/><circle cx="240" cy="168" r="21" fill="url(#${u}s)" stroke="rgba(255,255,255,.1)"/><circle cx="240" cy="168" r="13" fill="none" stroke="rgba(255,255,255,.07)"/></g>
+<circle cx="200" cy="176" r="8" fill="#1b1e26" stroke="rgba(255,255,255,.18)"/>
+<circle cx="200" cy="176" r="3.5" fill="none" stroke="#8a93a3" stroke-width="1.3"/>
+<rect x="190" y="195" width="20" height="6" rx="3" fill="#2a2e38"/>
+<circle class="led" cx="200" cy="198" r="1.6" fill="#ff8a65"/>`;
   return s;
 }
 
@@ -408,14 +409,14 @@ const PRESETS = [
 ];
 // Hotspots on the controller drawing: [buttonId, shape, x, y, (w, h), label]
 const HOT = [
-  [14, "r", 86, 12, 48, 13, "L2"], [15, "r", 266, 12, 48, 13, "R2"],
-  [12, "r", 88, 30, 48, 12, "L1"], [13, "r", 264, 30, 48, 12, "R1"],
-  [16, "c", 126, 63, 0, 0, "≡"], [17, "c", 274, 63, 0, 0, "☰"],
-  [21, "r", 152, 58, 96, 58, "Pavé"],
-  [0, "c", 86, 98, 0, 0, "▲"], [4, "c", 86, 134, 0, 0, "▼"], [6, "c", 68, 116, 0, 0, "◀"], [2, "c", 104, 116, 0, 0, "▶"],
-  [11, "c", 314, 94, 0, 0, "△"], [9, "c", 314, 138, 0, 0, "✕"], [8, "c", 292, 116, 0, 0, "□"], [10, "c", 336, 116, 0, 0, "○"],
-  [18, "c", 155, 170, 0, 0, "L3"], [19, "c", 245, 170, 0, 0, "R3"],
-  [20, "c", 200, 170, 0, 0, "PS"], [22, "r", 187, 186, 26, 10, ""],
+  [14, "r", 82, 12, 50, 13, "L2"], [15, "r", 268, 12, 50, 13, "R2"],
+  [12, "r", 84, 30, 50, 12, "L1"], [13, "r", 266, 30, 50, 12, "R1"],
+  [16, "c", 115, 67, 0, 0, "≡"], [17, "c", 285, 67, 0, 0, "☰"],
+  [21, "r", 156, 56, 88, 56, "Pavé"],
+  [0, "c", 70, 96, 0, 0, "▲"], [4, "c", 70, 128, 0, 0, "▼"], [6, "c", 54, 112, 0, 0, "◀"], [2, "c", 86, 112, 0, 0, "▶"],
+  [11, "c", 330, 90, 0, 0, "△"], [9, "c", 330, 134, 0, 0, "✕"], [8, "c", 308, 112, 0, 0, "□"], [10, "c", 352, 112, 0, 0, "○"],
+  [18, "c", 160, 168, 0, 0, "L3"], [19, "c", 240, 168, 0, 0, "R3"],
+  [20, "c", 200, 176, 0, 0, "PS"], [22, "r", 187, 192, 26, 10, ""],
 ];
 let selBtn = 9;
 const targetName = (v) => v === COMBO ? "PS + R2 (capture)" : BUTTONS[v] ?? "?";
