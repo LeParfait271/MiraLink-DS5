@@ -46,3 +46,9 @@ Base : awalol/DS5Dongle @ 77d378e. Original intact dans `../DS5Dongle.orig` pour
 Les deux nouvelles options sont ajoutées à la fin de `Config_body`, sans changer `CONFIG_VERSION` : les configs existantes sont conservées (les nouvelles options sont désactivées par défaut). L'interface web d'awalol ne les connaît pas ; utiliser `tools/config_tool.py`.
 
 CI : workflow `tests.yml` (tests hôte) ajouté, GitHub Actions activé sur le fork (le build `.uf2` tourne à chaque push).
+
+## 4e passe : synchro upstream + gâchettes
+
+- Fusion des 8 nouveaux commits d'awalol (rééchantillonnage audio sinc, micro au rythme du dongle, `sleep_on_dock`, ignorer le volume système #287…).
+- Disposition de la config : `sleep_on_dock` (upstream) d'abord, puis `disable_touchpad` et `symmetric_haptics`. Si tu avais déjà activé une de nos deux options, re-vérifie-les avec `config_tool.py`.
+- **#228** (gâchettes adaptatives faibles ou absentes depuis v0.7.2) : en v0.7.2 (commit `f9548a3`), le numéro de série USB est passé d'activé à désactivé par défaut, et le rapporteur confirme que l'activer règle le problème. Les nouvelles configs l'activent à nouveau par défaut. Une config existante garde sa valeur : mettre `enable_usb_sn=1` puis reconnecter l'USB.
