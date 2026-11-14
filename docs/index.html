@@ -118,6 +118,41 @@ code{font:12px ui-monospace,Consolas,monospace;background:var(--panel2);padding:
 .go:disabled,.ghost:disabled{opacity:.4;cursor:default}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
 .hidden{display:none!important}
+/* motion */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+.hero>*{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}.hero>*:nth-child(2){animation-delay:.12s}
+.dash>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}.dash>*:nth-child(2){animation-delay:.08s}
+#panel .sec{animation:rise .35s cubic-bezier(.2,.8,.2,1) both}
+.pad .led{animation:glow 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* presets */
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:6px 0 18px}
+.preset{text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--fg);border-radius:14px;padding:14px;cursor:pointer;font:inherit;transition:.15s}
+.preset:hover{border-color:var(--line2);background:var(--panel2)}
+.preset b{display:block;font-size:14px}
+.preset span{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+.preset .e{font-size:20px;margin-bottom:6px}
+.lbl-s{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding-top:6px}
+/* visual remap */
+.vis{display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:center;padding:4px 0 18px}
+.vis svg{width:100%;height:auto}
+.hs{cursor:pointer}
+.hs circle,.hs rect{fill:rgba(255,255,255,.06);stroke:rgba(255,255,255,.28);stroke-width:1.5;transition:.15s}
+.hs text{fill:var(--fg);font:700 11px Inter,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.hs:hover circle,.hs:hover rect{fill:rgba(77,124,255,.2);stroke:var(--a1)}
+.hs.chg circle,.hs.chg rect{fill:rgba(155,92,255,.22);stroke:var(--a2)}
+.hs.sel circle,.hs.sel rect{fill:rgba(77,124,255,.35);stroke:#fff;stroke-width:2}
+.editor{border:1px solid var(--line);border-radius:16px;padding:18px;background:rgba(255,255,255,.02)}
+.editor .big{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:2px 0 12px}
+.editor .muted{color:var(--mut);font-size:13px}
+.editor .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.editor .acts .mini{white-space:nowrap;flex:1}
+.mini{border:1px solid var(--line2);background:none;color:var(--fg);font:600 13px Inter,sans-serif;padding:8px 12px;border-radius:10px;cursor:pointer}
+.mini:hover{background:var(--panel2)}
+.mini.dng{color:var(--err);border-color:rgba(248,113,113,.35)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;padding:18px 0 22px;border-top:1px solid var(--line)}
+@media (max-width:760px){.vis{grid-template-columns:1fr}.presets{grid-template-columns:1fr}}
 footer{text-align:center;color:var(--dim);font-size:12px;margin-top:40px}
 footer a{color:var(--mut)}
 
@@ -152,7 +187,8 @@ footer a{color:var(--mut)}
     <g stroke="rgba(255,255,255,.35)" stroke-width="2.5"><circle cx="300" cy="96" r="9"/><circle cx="300" cy="136" r="9"/><circle cx="280" cy="116" r="9"/><circle cx="320" cy="116" r="9"/></g>
     <circle cx="150" cy="160" r="22" fill="#0a0c12" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
     <circle cx="250" cy="160" r="22" fill="#0a0c12" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
-    <circle cx="200" cy="150" r="7" fill="url(#ga)"/>
+    <circle class="led" cx="200" cy="150" r="7" fill="url(#ga)"/>
+    <path class="led" d="M160 62h80" stroke="url(#ga)" stroke-width="6" stroke-linecap="round" opacity=".5" style="filter:blur(4px)"/>
   </svg>
 </section>
 
@@ -330,11 +366,109 @@ function renderTabs() {
     $("tabs").append(b);
   }
 }
+const PRESETS = [
+  {e: "🎯", n: "Compétitif", d: "Latence minimale, vibrations sobres",
+   v: {polling_rate_mode: 3, haptics_gain: 1.0, trigger_reduce: 0, symmetric_haptics: 0}},
+  {e: "🎮", n: "Immersion", d: "Vibrations fortes, gâchettes complètes",
+   v: {polling_rate_mode: 2, haptics_gain: 1.6, trigger_reduce: 0, symmetric_haptics: 0}},
+  {e: "🔋", n: "Endurance", d: "Batterie qui dure plus longtemps",
+   v: {polling_rate_mode: 0, haptics_gain: 1.0, trigger_reduce: 5, inactive_time: 10}},
+];
+// Hotspots on the controller drawing: [buttonId, shape, x, y, (w, h), label]
+const HOT = [
+  [14, "r", 66, 2, 56, 16, "L2"], [15, "r", 278, 2, 56, 16, "R2"],
+  [12, "r", 76, 22, 52, 14, "L1"], [13, "r", 272, 22, 52, 14, "R1"],
+  [16, "c", 138, 56, 0, 0, "≡"], [17, "c", 262, 56, 0, 0, "☰"],
+  [21, "r", 152, 64, 96, 52, "Pavé"],
+  [0, "c", 99, 92, 0, 0, "▲"], [4, "c", 99, 140, 0, 0, "▼"], [6, "c", 75, 116, 0, 0, "◀"], [2, "c", 123, 116, 0, 0, "▶"],
+  [11, "c", 300, 90, 0, 0, "△"], [9, "c", 300, 142, 0, 0, "✕"], [8, "c", 274, 116, 0, 0, "□"], [10, "c", 326, 116, 0, 0, "○"],
+  [18, "c", 150, 168, 0, 0, "L3"], [19, "c", 250, 168, 0, 0, "R3"],
+  [20, "c", 200, 146, 0, 0, "PS"], [22, "r", 186, 178, 28, 12, ""],
+];
+let selBtn = 9;
+const targetName = (v) => v === COMBO ? "PS + R2 (capture)" : BUTTONS[v] ?? "?";
+function remapSelect(s, onchange) {
+  const sel = document.createElement("select");
+  BUTTONS.forEach((n, i) => sel.add(new Option(i === s ? `${n} (par défaut)` : n, i)));
+  sel.add(new Option("PS + R2 (capture)", COMBO));
+  sel.value = remap[s]; sel.onchange = () => { remap[s] = Number(sel.value); onchange(); refreshDock(); };
+  return sel;
+}
+function visualRemap(sec) {
+  const box = document.createElement("div"); box.className = "vis";
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg"); svg.setAttribute("viewBox", "0 0 400 260");
+  svg.innerHTML = '<path d="M118 40h164c34 0 58 22 66 52l30 108c8 30-26 52-50 30l-42-42H114l-42 42c-24 22-58 0-50-30l30-108c8-30 32-52 66-52z" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>';
+  const ed = document.createElement("div"); ed.className = "editor";
+  const draw = () => {
+    svg.querySelectorAll(".hs").forEach((n) => n.remove());
+    for (const [id, sh, x, y, w, h, lab] of HOT) {
+      const g = document.createElementNS(ns, "g");
+      g.setAttribute("class", "hs" + (remap[id] !== id ? " chg" : "") + (id === selBtn ? " sel" : ""));
+      g.innerHTML = sh === "r"
+        ? `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(8, h / 2)}"/><text x="${x + w / 2}" y="${y + h / 2}">${lab}</text>`
+        : `<circle cx="${x}" cy="${y}" r="${id >= 18 && id <= 20 ? 14 : 11}"/><text x="${x}" y="${y}">${lab}</text>`;
+      g.onclick = () => { selBtn = id; draw(); };
+      svg.append(g);
+    }
+    ed.innerHTML = `<div class="muted">Bouton sélectionné</div><div class="big">${BUTTONS[selBtn]}</div><div class="muted" style="margin-bottom:6px">Agit comme</div>`;
+    ed.append(remapSelect(selBtn, draw));
+    const acts = document.createElement("div"); acts.className = "acts";
+    const r1 = document.createElement("button"); r1.className = "mini"; r1.textContent = "Par défaut";
+    r1.onclick = () => { remap[selBtn] = selBtn; draw(); refreshDock(); };
+    const r2 = document.createElement("button"); r2.className = "mini dng"; r2.textContent = "Tout réinitialiser";
+    r2.onclick = () => { for (let i = 0; i < SRC; i++) remap[i] = i; renderPanel(); refreshDock(); };
+    acts.append(r1, r2); ed.append(acts);
+    const n = remap.slice(0, SRC).filter((v, i) => v !== i).length;
+    ed.insertAdjacentHTML("beforeend", `<div class="muted" style="margin-top:14px">${n ? n + " bouton" + (n > 1 ? "s" : "") + " modifié" + (n > 1 ? "s" : "") : "Aucun bouton modifié"}</div>`);
+  };
+  draw(); box.append(svg, ed); sec.append(box);
+}
+function download(name, text) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type: "application/json"})); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function backupTools(sec) {
+  const t = document.createElement("div"); t.className = "tools";
+  const ex = document.createElement("button"); ex.className = "mini"; ex.textContent = "⬇ Exporter mes réglages";
+  ex.onclick = () => download("miralink-config.json", JSON.stringify({miralink: 1, config: cfg, remap: remap.slice(0, SRC)}, null, 2));
+  const im = document.createElement("button"); im.className = "mini"; im.textContent = "⬆ Importer";
+  const file = document.createElement("input"); file.type = "file"; file.accept = ".json,application/json"; file.hidden = true;
+  im.onclick = () => file.click();
+  file.onchange = async () => {
+    try {
+      const j = JSON.parse(await file.files[0].text());
+      for (const [k] of LAYOUT) if (k !== "config_version" && typeof j.config?.[k] === "number") cfg[k] = j.config[k];
+      if (Array.isArray(j.remap)) j.remap.slice(0, SRC).forEach((v, i) => { if (Number.isInteger(v) && v >= 0 && v <= COMBO) remap[i] = v; });
+      renderPanel(); refreshDock(); msg("Fichier importé · pense à enregistrer");
+    } catch (e) { flash("Fichier invalide", "err"); }
+    file.value = "";
+  };
+  t.append(ex, im, file);
+  sec.append(t);
+}
 function renderPanel() {
   const t = TABS.find((x) => x.id === tab), p = $("panel");
   p.innerHTML = `<div class="sec"><div class="sec-h">${icon(t.id)}<div><h2>${t.title}</h2><p>${t.sub}</p></div></div></div>`;
   const sec = p.firstChild;
+  if (t.id === "pad") {
+    sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Profils rapides</div>');
+    const pr = document.createElement("div"); pr.className = "presets";
+    for (const ps of PRESETS) {
+      const b = document.createElement("button"); b.className = "preset";
+      b.innerHTML = `<div class="e">${ps.e}</div><b>${ps.n}</b><span>${ps.d}</span>`;
+      b.onclick = () => { Object.assign(cfg, ps.v); renderPanel(); refreshDock(); msg(`Profil « ${ps.n} » appliqué · pense à enregistrer`); };
+      pr.append(b);
+    }
+    sec.append(pr);
+    sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Réglages</div>');
+  }
   if (t.remap) {
+    visualRemap(sec);
+    const det = document.createElement("details");
+    det.innerHTML = '<summary class="lbl-s" style="cursor:pointer;padding:8px 0">Liste complète (diagonales, boutons Edge)</summary>';
+    sec.append(det);
     const g = document.createElement("div"); g.className = "grid";
     for (let s = 0; s < SRC; s++) {
       const c = document.createElement("div"), sel = document.createElement("select");
@@ -347,7 +481,7 @@ function renderPanel() {
       sel.onchange = () => { remap[s] = Number(sel.value); paint(); refreshDock(); };
       g.append(c);
     }
-    sec.append(g);
+    det.append(g);
     sec.insertAdjacentHTML("beforeend", '<div class="note">Raccourcis clavier : <code>python tools/config_tool.py shortcut</code></div>');
     return;
   }
@@ -355,6 +489,10 @@ function renderPanel() {
     const r = document.createElement("div"); r.className = "row";
     r.innerHTML = `<div class="t"><div class="n">${label}</div>${help ? `<div class="h">${help}</div>` : ""}</div>`;
     r.append(control(name, spec)); sec.append(r);
+  }
+  if (t.id === "adv") {
+    sec.insertAdjacentHTML("beforeend", '<div class="lbl-s" style="padding-top:18px;border-top:1px solid var(--line)">Sauvegarde</div>');
+    backupTools(sec);
   }
 }
 
