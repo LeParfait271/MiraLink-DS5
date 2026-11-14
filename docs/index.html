@@ -5,114 +5,167 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MiraLink-DS5 Config</title>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--fg:#1b1f24;--mut:#5d6672;--line:#dde1e6;--acc:#2f6fed;--ok:#1a8a4a;--warn:#b5560b;--err:#c62828}
-@media (prefers-color-scheme:dark){:root{--bg:#121417;--card:#1b1e23;--fg:#e8eaed;--mut:#9aa3ad;--line:#2c3138;--acc:#6b9bff;--ok:#4cc47f;--warn:#f0a25a;--err:#ff6b6b}}
+:root{--bg:#f3f4f7;--card:#fff;--fg:#16191d;--mut:#5f6874;--line:#e1e4e9;--soft:#eef1f6;--acc:#2f6fed;--acc-fg:#fff;--ok:#16834a;--warn:#a85208;--err:#c62828}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1114;--card:#191c21;--fg:#eceef1;--mut:#9ba4ae;--line:#2a2f36;--soft:#22262d;--acc:#6b9bff;--acc-fg:#0f1114;--ok:#4cc47f;--warn:#f0a25a;--err:#ff6b6b}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
-h1{font-size:22px;margin:0 0 4px}
-h2{font-size:16px;margin:0 0 12px}
-.sub{color:var(--mut);margin:0 0 18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
-button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;padding:8px 14px;cursor:pointer}
-button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
-button:disabled{opacity:.5;cursor:default}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.stat{border:1px solid var(--line);border-radius:8px;padding:10px}
-.stat b{display:block;font-size:18px}
-.stat span{color:var(--mut);font-size:13px}
-.field{display:grid;grid-template-columns:1fr 200px;gap:4px 14px;padding:10px 0;border-top:1px solid var(--line);align-items:center}
-.field:first-child{border-top:0}
-.field label{font-weight:600}
-.field small{grid-column:1;color:var(--mut)}
-.field .ctl{grid-row:1/3;grid-column:2}
-select,input[type=number]{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
-input[type=range]{width:100%}
-.remap{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 16px}
-.remap div{display:flex;gap:8px;align-items:center}
-.remap span{width:90px;flex:none}
-#msg{min-height:1.4em;margin-top:8px}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 16px 120px}
+header h1{font-size:26px;margin:0}
+header p{color:var(--mut);margin:4px 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.card h2{font-size:18px;margin:0 0 4px}
+.card .lead{color:var(--mut);margin:0 0 10px;font-size:14px}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:10px 18px;cursor:pointer}
+button.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-fg)}
+button:disabled{opacity:.45;cursor:default}
+.start{text-align:center;padding:36px 20px}
+.start p{color:var(--mut);margin:12px 0 0;font-size:14px}
+.start button{font-size:17px;padding:14px 28px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--soft);border-radius:10px;padding:12px}
+.stat>span{display:block;color:var(--mut);font-size:13px}
+.stat b{font-size:17px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--mut);vertical-align:1px}
+.dot.on{background:var(--ok)}
+.set{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line)}
+.set:first-of-type{border-top:0}
+.set .txt{min-width:0}
+.set .name{font-weight:600}
+.set .help{color:var(--mut);font-size:14px}
+.set .ctl{flex:none;width:230px;display:flex;justify-content:flex-end;align-items:center;gap:10px}
+select{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg)}
+input[type=range]{flex:1;accent-color:var(--acc)}
+.val{min-width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.sw{position:relative;width:50px;height:28px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw i{position:absolute;inset:0;background:var(--line);border-radius:28px;transition:.15s;cursor:pointer}
+.sw i:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s}
+.sw input:checked+i{background:var(--acc)}
+.sw input:checked+i:before{transform:translateX(22px)}
+.sw input:focus-visible+i{outline:2px solid var(--acc);outline-offset:2px}
+details summary{cursor:pointer;font-weight:600;font-size:18px;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary:after{content:"▸";float:right;color:var(--mut)}
+details[open] summary:after{content:"▾"}
+details summary small{display:block;font-weight:400;font-size:14px;color:var(--mut)}
+details[open] summary{margin-bottom:10px}
+.remap{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 18px}
+.remap label{display:flex;align-items:center;gap:10px}
+.remap label span{width:96px;flex:none;font-weight:600}
+.remap select.changed{border-color:var(--acc);font-weight:600}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px}
+.bar .in{max-width:760px;margin:0 auto;display:flex;gap:12px;align-items:center}
+#msg{flex:1;font-size:14px}
 .ok{color:var(--ok)}.err{color:var(--err)}.warn{color:var(--warn)}
-.hidden{display:none}
-@media (max-width:560px){.field{grid-template-columns:1fr}.field .ctl{grid-row:auto;grid-column:1}}
+.hidden{display:none!important}
+code{background:var(--soft);padding:1px 5px;border-radius:5px;font-size:14px}
+@media (max-width:600px){.set{flex-direction:column;align-items:stretch}.set .ctl{width:100%}}
 </style>
 </head>
 <body>
 <main>
-<h1>MiraLink-DS5</h1>
-<p class="sub">Configuration du dongle Pico 2 W, directement depuis le navigateur (Chrome ou Edge).</p>
+<header>
+  <h1>MiraLink-DS5</h1>
+  <p>Réglages du dongle DualSense, sans rien installer.</p>
+</header>
 
-<div class="card">
-  <div class="row">
-    <button class="primary" id="connect">Connecter le Pico</button>
-    <button id="save" disabled>Enregistrer sur le Pico</button>
-    <button id="reload" disabled>Relire</button>
-  </div>
-  <div id="msg"></div>
+<div class="card start" id="start">
+  <button class="primary" id="connect">Connecter le Pico</button>
+  <p id="hint">Branche le Pico en USB, clique, puis choisis « DualSense » dans la fenêtre.<br>Ferme Steam et DSX s'ils sont ouverts.</p>
   <p id="nohid" class="err hidden">Ce navigateur ne gère pas WebHID. Ouvre cette page dans Chrome ou Edge sur PC.</p>
 </div>
 
 <div id="ui" class="hidden">
   <div class="card">
     <h2>État</h2>
-    <div class="grid">
-      <div class="stat"><span>Firmware</span><b id="s-fw">–</b></div>
+    <p class="lead">Mis à jour toutes les 2 secondes.</p>
+    <div class="stats">
       <div class="stat"><span>Manette</span><b id="s-conn">–</b></div>
-      <div class="stat"><span>Signal</span><b id="s-rssi">–</b></div>
       <div class="stat"><span>Batterie</span><b id="s-bat">–</b></div>
+      <div class="stat"><span>Signal</span><b id="s-rssi">–</b></div>
       <div class="stat"><span>Audio</span><b id="s-audio">–</b></div>
+      <div class="stat"><span>Firmware</span><b id="s-fw">–</b></div>
     </div>
   </div>
-  <div class="card"><h2>Réglages</h2><div id="fields"></div></div>
-  <div class="card"><h2>Remap des boutons</h2><div class="remap" id="remap"></div></div>
-  <p class="sub">Les raccourcis clavier se règlent pour l'instant avec <code>python tools/config_tool.py shortcut</code>.</p>
+  <div id="groups"></div>
+  <div class="card">
+    <details>
+      <summary>Remap des boutons<small>Changer ce que fait chaque bouton.</small></summary>
+      <div class="remap" id="remap"></div>
+    </details>
+  </div>
+  <p class="lead" style="color:var(--mut);font-size:14px">Raccourcis clavier : <code>python tools/config_tool.py shortcut</code></p>
 </div>
 </main>
+
+<div class="bar hidden" id="bar"><div class="in">
+  <div id="msg"></div>
+  <button id="reload">Annuler</button>
+  <button class="primary" id="save" disabled>Enregistrer</button>
+</div></div>
+
 <script>
 "use strict";
 const VID = 0x054C, PIDS = [0x0CE6, 0x0DF2];
-const R_SET = 0xF6, R_CFG = 0xF7, R_VER = 0xF8, R_STAT = 0xF9, R_REMAP = 0xFA;
-const LEN = 63;
-const B = (o) => Object.entries(o).map(([v, l]) => [Number(v), l]);
-const ONOFF = B({0: "Non", 1: "Oui"});
-const AUDIO_SEL = B({0: "Auto", 1: "Intégré à la manette", 2: "Prise casque", 3: "Désactivé"});
-// Order and types MUST match Config_body in src/config.h (same as tools/config_tool.py FIELDS).
-const FIELDS = [
-  ["config_version", "u8", null, "Version de config", "Géré par le firmware."],
-  ["haptics_gain", "f32", {min: 1, max: 2, step: 0.05}, "Force des vibrations", "1.0 = normal, 2.0 = double."],
-  ["speaker_volume", "u8", {min: 0, max: 127}, "Volume haut-parleur", "Haut-parleur de la manette."],
-  ["headset_volume", "u8", {min: 0, max: 127}, "Volume casque", "Casque branché sur la manette."],
-  ["speaker_gain", "u8", {min: 0, max: 7}, "Pré-gain haut-parleur", "0 = défaut."],
-  ["inactive_time", "u8", {min: 0, max: 60}, "Mise en veille manette (min)", "Éteint la manette après X minutes sans action. 0 = jamais."],
-  ["disable_pico_led", "u8", ONOFF, "Éteindre la LED du Pico", ""],
-  ["polling_rate_mode", "u8", B({0: "250 Hz", 1: "500 Hz", 2: "1000 Hz", 3: "Temps réel"}), "Fréquence d'envoi", "Plus haut = moins de latence."],
-  ["audio_buffer_length", "u8", {min: 16, max: 128}, "Tampon audio", "Plus grand = moins de coupures, plus de latence."],
-  ["controller_mode", "u8", B({0: "DualSense", 1: "DualSense Edge", 2: "Auto"}), "Type de manette annoncé", ""],
-  ["enable_usb_sn", "u8", ONOFF, "Numéro de série USB", "Laisse sur Oui : nécessaire aux gâchettes adaptatives complètes dans certains jeux."],
-  ["enable_keyboard", "u8", ONOFF, "Interface clavier USB", "Nécessaire pour les raccourcis clavier."],
-  ["mic_select", "u8", AUDIO_SEL, "Micro", ""],
-  ["speaker_select", "u8", AUDIO_SEL, "Sortie son", ""],
-  ["enable_wake", "u8", ONOFF, "Réveiller le PC avec PS", ""],
-  ["trigger_reduce", "u8", {min: 0, max: 10}, "Réduction force gâchettes", "0 = auto."],
-  ["lock_volume", "u8", B({0: "Non", 1: "Bloquer le volume des jeux", 2: "Bloquer le volume Windows"}), "Verrouiller le volume", ""],
-  ["status_gpio_pin", "u8", {min: 0, max: 255}, "Broche GPIO d'état", "255 = désactivé."],
-  ["status_gpio_mode", "u8", B({0: "Haut tant que connecté", 1: "Impulsion 200 ms"}), "Mode GPIO d'état", ""],
-  ["packet_mode", "u8", B({0: "Double paquet", 1: "Paquet simple"}), "Mode paquets BT", ""],
-  ["disconnect_on_dock", "u8", ONOFF, "Couper le BT sur le socle", "Déconnecte la manette posée sur son socle de charge."],
-  ["sleep_on_dock", "u8", ONOFF, "Mettre le PC en veille sur le socle", ""],
-  ["disable_touchpad", "u8", ONOFF, "Désactiver le pavé tactile", "Le PC ne voit plus le pavé ni son clic."],
-  ["symmetric_haptics", "u8", ONOFF, "Vibrations symétriques", "Même vibration des deux côtés."],
-];
-const BUTTONS = ["Haut", "Haut-droite", "Droite", "Bas-droite", "Bas", "Bas-gauche", "Gauche", "Haut-gauche",
-  "Carré", "Croix", "Rond", "Triangle", "L1", "R1", "L2", "R2", "Create", "Options", "L3", "R3", "PS",
-  "Pavé", "Mute", "Fn gauche", "Fn droite", "Palette G", "Palette D", "Désactivé"];
-const SRC_COUNT = BUTTONS.length - 1, COMBO_PS_R2 = BUTTONS.length;
-const POWER = {0: "sur batterie", 1: "en charge", 2: "chargée"};
+const R_SET = 0xF6, R_CFG = 0xF7, R_VER = 0xF8, R_STAT = 0xF9, R_REMAP = 0xFA, LEN = 63;
+const L = (o) => Object.entries(o).map(([v, l]) => [Number(v), l]);
+const SW = "switch";
+const AUDIO = L({0: "Automatique", 1: "Manette", 2: "Casque", 3: "Désactivé"});
 
-let dev = null, cfg = {}, remap = [], statusTimer = null;
+// Binary layout: order and types MUST match Config_body (src/config.h).
+const LAYOUT = [
+  ["config_version", "u8"], ["haptics_gain", "f32"], ["speaker_volume", "u8"], ["headset_volume", "u8"],
+  ["speaker_gain", "u8"], ["inactive_time", "u8"], ["disable_pico_led", "u8"], ["polling_rate_mode", "u8"],
+  ["audio_buffer_length", "u8"], ["controller_mode", "u8"], ["enable_usb_sn", "u8"], ["enable_keyboard", "u8"],
+  ["mic_select", "u8"], ["speaker_select", "u8"], ["enable_wake", "u8"], ["trigger_reduce", "u8"],
+  ["lock_volume", "u8"], ["status_gpio_pin", "u8"], ["status_gpio_mode", "u8"], ["packet_mode", "u8"],
+  ["disconnect_on_dock", "u8"], ["sleep_on_dock", "u8"], ["disable_touchpad", "u8"], ["symmetric_haptics", "u8"],
+];
+
+// Display: [field, control, label, help]. control = SW | options list | {min,max,step,fmt}
+const GROUPS = [
+  {title: "Manette", items: [
+    ["haptics_gain", {min: 1, max: 2, step: 0.05, fmt: (v) => "×" + v.toFixed(2)}, "Force des vibrations", "×1 = normal, ×2 = double."],
+    ["symmetric_haptics", SW, "Vibrations symétriques", "Même vibration à gauche et à droite."],
+    ["trigger_reduce", {min: 0, max: 10, fmt: (v) => v ? String(v) : "Auto"}, "Réduction des gâchettes", "Adoucit la résistance des gâchettes adaptatives."],
+    ["disable_touchpad", SW, "Désactiver le pavé tactile", "Le PC ne voit plus le pavé ni son clic."],
+    ["inactive_time", {min: 0, max: 60, fmt: (v) => v ? v + " min" : "Jamais"}, "Extinction automatique", "Éteint la manette sans utilisation."],
+  ]},
+  {title: "Son", items: [
+    ["speaker_select", AUDIO, "Sortie son", "Où joue le son du PC."],
+    ["mic_select", AUDIO, "Micro", "Quel micro utiliser."],
+    ["speaker_volume", {min: 0, max: 127}, "Volume haut-parleur", ""],
+    ["headset_volume", {min: 0, max: 127}, "Volume casque", ""],
+    ["lock_volume", L({0: "Non", 1: "Volume des jeux", 2: "Volume Windows"}), "Bloquer le volume", "Empêche le PC de changer le volume."],
+  ]},
+  {title: "PC et Pico", items: [
+    ["enable_wake", SW, "Réveiller le PC avec PS", ""],
+    ["sleep_on_dock", SW, "Veille du PC sur le socle", "Le PC se met en veille quand la manette est posée sur son socle."],
+    ["disconnect_on_dock", SW, "Déconnecter sur le socle", "Coupe le Bluetooth quand la manette charge sur son socle."],
+    ["disable_pico_led", SW, "Éteindre la LED du Pico", ""],
+    ["polling_rate_mode", L({0: "250 Hz", 1: "500 Hz", 2: "1000 Hz", 3: "Temps réel"}), "Fréquence", "Plus haut = moins de latence."],
+  ]},
+  {title: "Avancé", fold: true, sub: "À ne toucher qu'en cas de problème.", items: [
+    ["enable_usb_sn", SW, "Numéro de série USB", "Garde activé : nécessaire aux gâchettes adaptatives dans certains jeux."],
+    ["controller_mode", L({0: "DualSense", 1: "DualSense Edge", 2: "Automatique"}), "Type de manette annoncé", ""],
+    ["enable_keyboard", SW, "Clavier USB", "Nécessaire pour les raccourcis clavier."],
+    ["audio_buffer_length", {min: 16, max: 128}, "Tampon audio", "Plus grand = moins de coupures, plus de latence."],
+    ["speaker_gain", {min: 0, max: 7}, "Pré-gain haut-parleur", ""],
+    ["packet_mode", L({0: "Double", 1: "Simple"}), "Paquets Bluetooth", ""],
+    ["status_gpio_pin", {min: 0, max: 255, fmt: (v) => v === 255 ? "Off" : "GP" + v}, "Broche GPIO d'état", "255 = désactivé."],
+    ["status_gpio_mode", L({0: "Allumé si connecté", 1: "Impulsion 200 ms"}), "Mode GPIO", ""],
+  ]},
+];
+const RESTART = new Set(["enable_usb_sn", "controller_mode", "enable_keyboard"]);
+const BUTTONS = ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖", "Carré", "Croix", "Rond", "Triangle", "L1", "R1",
+  "L2", "R2", "Create", "Options", "L3", "R3", "PS", "Pavé", "Mute", "Fn gauche", "Fn droite",
+  "Palette G", "Palette D", "Désactivé"];
+const SRC = BUTTONS.length - 1, COMBO = BUTTONS.length;
+const POWER = {0: "", 1: " ⚡", 2: " ✓"};
+
+let dev = null, cfg = {}, saved = {}, remap = [], savedRemap = [], timer = null;
 const $ = (id) => document.getElementById(id);
-const msg = (t, cls = "") => { $("msg").textContent = t; $("msg").className = cls; };
+const msg = (t, c = "") => { $("msg").textContent = t; $("msg").className = c; };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function getReport(id) {
@@ -122,67 +175,76 @@ async function getReport(id) {
   return u;
 }
 async function setReport(id, bytes) {
-  const buf = new Uint8Array(LEN);
-  buf.set(bytes.slice(0, LEN));
-  await dev.sendFeatureReport(id, buf);
-  await sleep(50);
+  const b = new Uint8Array(LEN); b.set(bytes.slice(0, LEN));
+  await dev.sendFeatureReport(id, b); await sleep(50);
 }
 function unpack(u) {
-  const dv = new DataView(u.buffer, u.byteOffset, u.byteLength);
-  const out = {}; let o = 0;
-  for (const [name, kind] of FIELDS) {
-    if (kind === "f32") { out[name] = o + 4 <= u.length ? dv.getFloat32(o, true) : 1; o += 4; }
-    else { out[name] = o < u.length ? u[o] : 0; o += 1; }
+  const dv = new DataView(u.buffer, u.byteOffset, u.byteLength), o = {}; let p = 0;
+  for (const [n, k] of LAYOUT) {
+    if (k === "f32") { o[n] = p + 4 <= u.length ? dv.getFloat32(p, true) : 1; p += 4; }
+    else { o[n] = p < u.length ? u[p] : 0; p++; }
   }
-  return out;
+  return o;
 }
 function pack(c) {
-  const size = FIELDS.reduce((s, f) => s + (f[1] === "f32" ? 4 : 1), 0);
-  const u = new Uint8Array(size), dv = new DataView(u.buffer); let o = 0;
-  for (const [name, kind] of FIELDS) {
-    if (kind === "f32") { dv.setFloat32(o, c[name], true); o += 4; }
-    else { u[o] = c[name] & 0xFF; o += 1; }
-  }
+  const u = new Uint8Array(LAYOUT.reduce((s, f) => s + (f[1] === "f32" ? 4 : 1), 0)), dv = new DataView(u.buffer); let p = 0;
+  for (const [n, k] of LAYOUT) { if (k === "f32") { dv.setFloat32(p, c[n], true); p += 4; } else u[p++] = c[n] & 255; }
   return u;
 }
-
-function renderFields() {
-  const box = $("fields"); box.innerHTML = "";
-  for (const [name, kind, spec, label, help] of FIELDS) {
-    if (!spec) continue;
-    const row = document.createElement("div"); row.className = "field";
-    row.innerHTML = `<label for="f-${name}">${label}</label><small>${help}</small>`;
-    const wrap = document.createElement("div"); wrap.className = "ctl";
-    let ctl;
-    if (Array.isArray(spec)) {
-      ctl = document.createElement("select");
-      for (const [v, l] of spec) ctl.add(new Option(l, v));
-    } else {
-      ctl = document.createElement("input"); ctl.type = "number";
-      ctl.min = spec.min; ctl.max = spec.max; ctl.step = spec.step || 1;
-    }
-    ctl.id = "f-" + name;
-    ctl.value = kind === "f32" ? Number(cfg[name]).toFixed(2) : cfg[name];
-    ctl.onchange = () => {
-      let v = Number(ctl.value);
-      if (!Array.isArray(spec)) v = Math.min(spec.max, Math.max(spec.min, v));
-      cfg[name] = kind === "f32" ? v : Math.round(v);
-      ctl.value = kind === "f32" ? v.toFixed(2) : cfg[name];
-      msg("Modifications non enregistrées.", "warn");
-    };
-    wrap.append(ctl); row.append(wrap); box.append(row);
-  }
+const changedKeys = () => LAYOUT.map((f) => f[0]).filter((k) => Math.abs(cfg[k] - saved[k]) > 1e-4);
+const dirty = () => changedKeys().length > 0 || remap.some((v, i) => v !== savedRemap[i]);
+function refreshBar() {
+  const d = dirty(); $("save").disabled = !d; $("reload").disabled = !d;
+  if (d) msg("Modifications non enregistrées", "warn");
 }
-function renderRemap() {
-  const box = $("remap"); box.innerHTML = "";
-  for (let s = 0; s < SRC_COUNT; s++) {
-    const d = document.createElement("div");
-    const sel = document.createElement("select");
-    BUTTONS.forEach((n, i) => sel.add(new Option(i === s ? `${n} (normal)` : n, i)));
-    sel.add(new Option("PS + R2 (capture)", COMBO_PS_R2));
-    sel.value = remap[s];
-    sel.onchange = () => { remap[s] = Number(sel.value); msg("Modifications non enregistrées.", "warn"); };
-    d.innerHTML = `<span>${BUTTONS[s]}</span>`; d.append(sel); box.append(d);
+
+function control(name, spec) {
+  const wrap = document.createElement("div"); wrap.className = "ctl";
+  const set = (v) => { cfg[name] = v; refreshBar(); };
+  if (spec === SW) {
+    wrap.innerHTML = `<label class="sw"><input type="checkbox" aria-label="${name}"><i></i></label>`;
+    const cb = wrap.querySelector("input"); cb.checked = !!cfg[name];
+    cb.onchange = () => set(cb.checked ? 1 : 0);
+  } else if (Array.isArray(spec)) {
+    const s = document.createElement("select");
+    for (const [v, l] of spec) s.add(new Option(l, v));
+    s.value = cfg[name]; s.onchange = () => set(Number(s.value)); wrap.append(s);
+  } else {
+    const r = document.createElement("input"), out = document.createElement("span");
+    r.type = "range"; r.min = spec.min; r.max = spec.max; r.step = spec.step || 1; out.className = "val";
+    const fmt = spec.fmt || String;
+    const v0 = Math.min(spec.max, Math.max(spec.min, cfg[name]));
+    r.value = v0; out.textContent = fmt(Number(v0));
+    r.oninput = () => { const v = Number(r.value); out.textContent = fmt(v); set(v); };
+    wrap.append(r, out);
+  }
+  return wrap;
+}
+function render() {
+  const box = $("groups"); box.innerHTML = "";
+  for (const g of GROUPS) {
+    const card = document.createElement("div"); card.className = "card";
+    let body = card;
+    if (g.fold) {
+      const d = document.createElement("details");
+      d.innerHTML = `<summary>${g.title}<small>${g.sub}</small></summary>`;
+      card.append(d); body = d;
+    } else card.innerHTML = `<h2>${g.title}</h2>`;
+    for (const [name, spec, label, help] of g.items) {
+      const row = document.createElement("div"); row.className = "set";
+      row.innerHTML = `<div class="txt"><div class="name">${label}</div>${help ? `<div class="help">${help}</div>` : ""}</div>`;
+      row.append(control(name, spec)); body.append(row);
+    }
+    box.append(card);
+  }
+  const rb = $("remap"); rb.innerHTML = "";
+  for (let s = 0; s < SRC; s++) {
+    const lab = document.createElement("label"), sel = document.createElement("select");
+    BUTTONS.forEach((n, i) => sel.add(new Option(i === s ? "Normal" : n, i)));
+    sel.add(new Option("PS + R2 (capture)", COMBO));
+    sel.value = remap[s]; sel.classList.toggle("changed", remap[s] !== s);
+    sel.onchange = () => { remap[s] = Number(sel.value); sel.classList.toggle("changed", remap[s] !== s); refreshBar(); };
+    lab.innerHTML = `<span>${BUTTONS[s]}</span>`; lab.append(sel); rb.append(lab);
   }
 }
 
@@ -190,72 +252,63 @@ async function readStatus() {
   if (!dev) return;
   try {
     const u = await getReport(R_STAT);
+    const flags = u.length >= 2 && (u[1] & 0x80) ? u[1] : null;
+    const conn = flags === null ? null : !!(flags & 4);
+    $("s-conn").innerHTML = conn === null ? "?" : `<span class="dot${conn ? " on" : ""}"></span>${conn ? "Connectée" : "Éteinte"}`;
     const rssi = u.length ? (u[0] << 24 >> 24) : null;
-    const hasFlags = u.length >= 2 && (u[1] & 0x80);
-    const conn = hasFlags ? !!(u[1] & 0x04) : null;
-    $("s-conn").textContent = conn === null ? "?" : conn ? "Connectée" : "Non connectée";
-    $("s-rssi").textContent = conn === false || rssi === null ? "–" : `${rssi} dBm`;
-    if (u.length >= 3 && u[2] !== 0xFF) {
-      const st = u[2] >> 4, pct = st === 2 ? 100 : Math.min(u[2] & 0x0F, 10) * 10;
-      $("s-bat").textContent = `~${pct} % (${POWER[st] || "anomalie"})`;
-    } else {
-      $("s-bat").textContent = u.length >= 3 ? "–" : "firmware trop ancien";
-    }
-    $("s-audio").textContent = hasFlags
-      ? `micro ${u[1] & 1 ? "on" : "off"}, son ${u[1] & 2 ? "on" : "off"}` : "?";
-  } catch (e) { /* device busy or gone; next tick retries */ }
+    $("s-rssi").textContent = !conn || rssi === null ? "–" : rssi > -60 ? "Bon" : rssi > -75 ? "Moyen" : "Faible";
+    $("s-rssi").title = rssi === null ? "" : rssi + " dBm";
+    if (conn && u.length >= 3 && u[2] !== 0xFF) {
+      const st = u[2] >> 4, pct = st === 2 ? 100 : Math.min(u[2] & 15, 10) * 10;
+      $("s-bat").textContent = `${pct} %${POWER[st] ?? " ⚠"}`;
+    } else $("s-bat").textContent = u.length < 3 && conn ? "Firmware ancien" : "–";
+    $("s-audio").textContent = flags === null ? "?" :
+      [flags & 2 ? "Son" : "", flags & 1 ? "Micro" : ""].filter(Boolean).join(" + ") || "Inactif";
+  } catch (e) { /* retried on next tick */ }
 }
 
 async function loadAll() {
-  const ver = await getReport(R_VER);
-  $("s-fw").textContent = new TextDecoder().decode(ver).replace(/\0.*$/s, "") || "?";
+  $("s-fw").textContent = new TextDecoder().decode(await getReport(R_VER)).replace(/\0.*$/s, "") || "?";
   const c = await getReport(R_CFG);
   if (c.length < 24) throw new Error("réponse de config trop courte");
-  cfg = unpack(c);
-  remap = Array.from((await getReport(R_REMAP)).slice(0, SRC_COUNT + 1));
-  renderFields(); renderRemap();
-  await readStatus();
+  cfg = unpack(c); saved = {...cfg};
+  remap = Array.from((await getReport(R_REMAP)).slice(0, SRC + 1)); savedRemap = [...remap];
+  render(); await readStatus(); refreshBar();
 }
 
 $("connect").onclick = async () => {
   try {
-    const list = await navigator.hid.requestDevice({
-      filters: PIDS.map((productId) => ({vendorId: VID, productId, usagePage: 0x01, usage: 0x05})),
-    });
+    const list = await navigator.hid.requestDevice({filters: PIDS.map((productId) => ({vendorId: VID, productId, usagePage: 1, usage: 5}))});
     if (!list.length) return;
-    dev = list[0];
-    if (!dev.opened) await dev.open();
+    dev = list[0]; if (!dev.opened) await dev.open();
     await loadAll();
-    $("ui").classList.remove("hidden");
-    $("save").disabled = $("reload").disabled = false;
-    $("connect").textContent = "Connecté";
-    msg("Pico connecté.", "ok");
-    clearInterval(statusTimer); statusTimer = setInterval(readStatus, 2000);
+    $("start").classList.add("hidden"); $("ui").classList.remove("hidden"); $("bar").classList.remove("hidden");
+    msg("Pico connecté", "ok");
+    clearInterval(timer); timer = setInterval(readStatus, 2000);
   } catch (e) {
-    msg("Impossible d'ouvrir le Pico : " + e.message + ". Ferme Steam/DSX s'ils l'utilisent.", "err");
+    $("hint").innerHTML = `<span class="err">Impossible d'ouvrir le Pico (${e.message}).</span><br>Ferme Steam et DSX, débranche/rebranche le Pico et réessaie.`;
   }
 };
-$("reload").onclick = async () => {
-  try { await loadAll(); msg("Relu depuis le Pico.", "ok"); } catch (e) { msg("Erreur : " + e.message, "err"); }
-};
+$("reload").onclick = () => { cfg = {...saved}; remap = [...savedRemap]; render(); refreshBar(); msg("Modifications annulées"); };
 $("save").onclick = async () => {
-  $("save").disabled = true;
+  const restart = changedKeys().some((k) => RESTART.has(k));
+  $("save").disabled = $("reload").disabled = true;
   try {
     msg("Enregistrement…");
     await setReport(R_SET, new Uint8Array([0x01, ...pack(cfg)]));
-    await getReport(R_CFG); // barrier: firmware applied the update
+    await getReport(R_CFG);
     await setReport(R_REMAP, new Uint8Array(remap));
     await setReport(R_SET, new Uint8Array([0x02]));
     await loadAll();
-    msg("Enregistré sur le Pico. Certains réglages USB (numéro de série, clavier, type de manette) demandent de débrancher/rebrancher le Pico.", "ok");
-  } catch (e) {
-    msg("Erreur pendant l'enregistrement : " + e.message, "err");
-  } finally { $("save").disabled = false; }
+    msg(restart ? "Enregistré. Débranche et rebranche le Pico pour appliquer." : "Enregistré ✓", restart ? "warn" : "ok");
+  } catch (e) { msg("Échec de l'enregistrement : " + e.message, "err"); refreshBar(); }
 };
-if (!("hid" in navigator)) { $("nohid").classList.remove("hidden"); $("connect").disabled = true; }
+if (!("hid" in navigator)) { $("nohid").classList.remove("hidden"); $("hint").classList.add("hidden"); $("connect").disabled = true; }
 navigator.hid?.addEventListener("disconnect", (e) => {
-  if (e.device === dev) { dev = null; clearInterval(statusTimer); $("connect").textContent = "Connecter le Pico";
-    $("save").disabled = $("reload").disabled = true; msg("Pico débranché.", "warn"); }
+  if (e.device !== dev) return;
+  dev = null; clearInterval(timer);
+  $("ui").classList.add("hidden"); $("bar").classList.add("hidden"); $("start").classList.remove("hidden");
+  $("hint").innerHTML = '<span class="warn">Pico débranché.</span> Rebranche-le puis clique sur « Connecter ».';
 });
 </script>
 </body>
