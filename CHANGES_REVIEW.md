@@ -52,3 +52,11 @@ CI : workflow `tests.yml` (tests hôte) ajouté, GitHub Actions activé sur le f
 - Fusion des 8 nouveaux commits d'awalol (rééchantillonnage audio sinc, micro au rythme du dongle, `sleep_on_dock`, ignorer le volume système #287…).
 - Disposition de la config : `sleep_on_dock` (upstream) d'abord, puis `disable_touchpad` et `symmetric_haptics`. Si tu avais déjà activé une de nos deux options, re-vérifie-les avec `config_tool.py`.
 - **#228** (gâchettes adaptatives faibles ou absentes depuis v0.7.2) : en v0.7.2 (commit `f9548a3`), le numéro de série USB est passé d'activé à désactivé par défaut, et le rapporteur confirme que l'activer règle le problème. Les nouvelles configs l'activent à nouveau par défaut. Une config existante garde sa valeur : mettre `enable_usb_sn=1` puis reconnecter l'USB.
+
+## Pass 5 — status command
+
+- Feature report `0xF9` now also returns a "controller connected" flag (byte 1, bit 2)
+  and a battery byte (byte 2: high nibble = power state, low nibble = level 0..10,
+  `0xFF` when no controller). Hosts that read only 2 bytes get exactly what they did before.
+- `config_tool.py status` shows connection, signal (dBm), battery and audio state.
+- Host test for the status decoder.

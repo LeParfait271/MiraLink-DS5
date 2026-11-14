@@ -13,6 +13,17 @@ spec.loader.exec_module(tool)
 
 
 class HoldTests(unittest.TestCase):
+    def test_status_decode(self):
+        st = tool.decode_status(bytes([0xC4, 0x84, 0x07]))
+        self.assertEqual(st['rssi'], -60)
+        self.assertTrue(st['connected'])
+        self.assertEqual(st['battery_percent'], 70)
+        self.assertEqual(st['battery_state'], 'on battery')
+        self.assertEqual(tool.decode_status(bytes([0xC4, 0x84, 0x2A]))['battery_percent'], 100)
+        old = tool.decode_status(bytes([0xC4, 0x82]))  # older firmware: 2 bytes
+        self.assertNotIn('battery_percent', old)
+        self.assertFalse(tool.decode_status(bytes([0, 0x80, 0xFF]))['connected'])
+
     def test_protocol(self):
         for text in ('1=Cross@hold:Space', '2=L1@hold:Ctrl+C',
                      '3=L1+R1@hold:Shift', '4=Home:F13', '5=Home*2:F14'):

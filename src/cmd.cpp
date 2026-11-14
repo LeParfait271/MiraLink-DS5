@@ -15,8 +15,10 @@
 #include "pico/time.h"
 #include "audio.h"
 #include "usb.h"
+#include "utils.h"
 
 extern bool spk_active;
+extern USBGetStateData interrupt_in_data;
 
 bool is_pico_cmd(uint8_t report_id) {
     if (report_id == 0xf6 ||
@@ -59,17 +61,29 @@ uint16_t pico_cmd_get(uint8_t report_id, uint8_t *buffer, uint16_t reqlen) {
         //   bit7 = valid marker (firmware without this byte leaves it 0)
         //   bit0 = controller mic actually streaming (host opened it AND mic_select != disable)
         //   bit1 = controller speaker actually driven (host opened it AND speaker_select != disable)
-        if (reqlen >= 2) {
-            uint8_t flags = 0x80;
-            if (audio_mic_active() && get_config().mic_select != 3) flags |= 0x01;
-            if (spk_active && get_config().speaker_select != 3) flags |= 0x02;
-            buffer[1] = flags;
-            return 2;
-        }
 #if ENABLE_VERBOSE
         printf("[HID] 0xf9 RSSI=%d raw=0x%02X\n", rssi, buffer[0]);
 #endif
-        return 1;
+        if (reqlen < 2) {
+            return 1;
+        }
+        uint8_t flags = 0x80;
+        if (audio_mic_active() && get_config().mic_select != 3) flags |= 0x01;
+        if (spk_active && get_config().speaker_select != 3) flags |= 0x02;
+        // bit2 = controller connected over BT (MiraLink extension)
+        const bool connected = bt_is_connected();
+        if (connected) flags |= 0x04;
+        buffer[1] = flags;
+        if (reqlen < 3) {
+            return 2;
+        }
+        // byte 2 (MiraLink extension): battery. High nibble = PowerState,
+        // low nibble = PowerPercent (0..10, x10 %). 0xFF when not connected.
+        buffer[2] = connected
+                        ? static_cast<uint8_t>((interrupt_in_data.Power << 4) |
+                                               (interrupt_in_data.PowerPercent & 0x0F))
+                        : 0xFF;
+        return 3;
     }
     if (report_id == 0xfa) {
         printf("[HID] Receive 0xfa getting button remaps\n");

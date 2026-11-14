@@ -5,6 +5,7 @@ Read and modify the ds5dongle configuration over USB HID, without reflashing.
 Protocol (see src/cmd.cpp / src/config.h):
   GET feature report 0xF7 -> raw Config_body bytes
   GET feature report 0xF8 -> firmware version string
+  GET feature report 0xF9 -> RSSI, audio/connection flags, battery
   GET/SET feature report 0xFA -> button remap table (28 bytes)
   GET/SET feature report 0xFB -> shortcut slots (63 bytes)
   SET feature report 0xF6:
@@ -19,6 +20,7 @@ Requires: pip install hidapi
 
 Examples:
   python config_tool.py get
+  python config_tool.py status
   python config_tool.py set speaker_volume=90 enable_wake=1
   python config_tool.py set haptics_gain=1.5 --no-save
   python config_tool.py remap
@@ -58,6 +60,7 @@ HID_USAGE_GAMEPAD = 0x05
 REPORT_SET = 0xF6        # SET_REPORT: write/save config
 REPORT_GET_CONFIG = 0xF7  # GET_REPORT: read Config_body
 REPORT_GET_VERSION = 0xF8  # GET_REPORT: firmware version string
+REPORT_STATUS = 0xF9      # GET_REPORT: RSSI, flags, battery
 REPORT_REMAP = 0xFA       # GET/SET_REPORT: button remap table
 REPORT_SHORTCUT = 0xFB    # GET/SET_REPORT: shortcut slots
 
@@ -492,6 +495,54 @@ def cmd_get(_args):
     print_shortcuts(shortcuts)
 
 
+POWER_STATES = {
+    0x0: "on battery", 0x1: "charging", 0x2: "fully charged",
+    0xA: "abnormal voltage", 0xB: "abnormal temperature", 0xF: "charging error",
+}
+
+
+def decode_status(raw):
+    """Decode the 0xF9 payload into a dict (pure function, host-testable)."""
+    out = {}
+    if len(raw) >= 1:
+        out["rssi"] = struct.unpack("b", bytes(raw[:1]))[0]
+    if len(raw) >= 2 and raw[1] & 0x80:
+        flags = raw[1]
+        out["mic_active"] = bool(flags & 0x01)
+        out["speaker_active"] = bool(flags & 0x02)
+        out["connected"] = bool(flags & 0x04)
+    if len(raw) >= 3 and raw[2] != 0xFF:
+        state, pct = raw[2] >> 4, raw[2] & 0x0F
+        out["battery_state"] = POWER_STATES.get(state, f"unknown (0x{state:X})")
+        out["battery_percent"] = 100 if state == 0x2 else min(pct, 10) * 10
+    return out
+
+
+def cmd_status(_args):
+    dev = open_device()
+    try:
+        version = read_version(dev)
+        try:
+            data = dev.get_feature_report(REPORT_STATUS, FEATURE_REPORT_LEN)
+        except (OSError, ValueError) as exc:
+            sys.exit(f"Failed reading status report 0x{REPORT_STATUS:02X}: {exc}")
+    finally:
+        dev.close()
+    raw = bytes(data[1:]) if data and data[0] == REPORT_STATUS else bytes(data or b"")
+    st = decode_status(raw)
+    if version:
+        print(f"Firmware:   {version}")
+    if "connected" in st:
+        print(f"Controller: {'connected' if st['connected'] else 'not connected'}")
+    if st.get("connected", True) and "rssi" in st:
+        print(f"Signal:     {st['rssi']} dBm")
+    if "battery_percent" in st:
+        print(f"Battery:    ~{st['battery_percent']}% ({st['battery_state']})")
+    if "mic_active" in st:
+        print(f"Audio:      mic {'on' if st['mic_active'] else 'off'}, "
+              f"speaker {'on' if st['speaker_active'] else 'off'}")
+
+
 def cmd_set(args):
     updates = dict(parse_assignment(t) for t in args.assignments)
     if not updates:
@@ -833,6 +884,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("get", help="read and print the current config").set_defaults(func=cmd_get)
+    sub.add_parser("status", help="show controller connection, signal and battery").set_defaults(func=cmd_status)
     sub.add_parser("fields", help="list configurable fields and ranges").set_defaults(func=cmd_fields)
 
     p_set = sub.add_parser("set", help="set one or more fields (name=value ...)")
