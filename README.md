@@ -5,6 +5,8 @@
 > fixes and quality-of-life improvements; see [CHANGES_REVIEW.md](./CHANGES_REVIEW.md) for what differs
 > from upstream. Issues and pull requests for this fork go here, not upstream.
 
+**Web config (Chrome/Edge): https://leparfait271.github.io/MiraLink-DS5/**
+
 [中文](./README.CN.md) (upstream, not yet updated for this fork)
 
 > Turn a Raspberry Pi Pico2W (or other compatible board) into a wireless adapter for the DualSense (DS5) controller.
