@@ -118,6 +118,17 @@ code{font:12px ui-monospace,Consolas,monospace;background:var(--panel2);padding:
 .ghost{border:1px solid var(--line2);background:none;color:var(--fg);font:600 14px Inter,sans-serif;padding:10px 16px;border-radius:11px;cursor:pointer}
 .go{border:0;background:var(--grad);color:#fff;font:600 14px Inter,sans-serif;padding:10px 18px;border-radius:11px;cursor:pointer}
 .go:disabled,.ghost:disabled{opacity:.4;cursor:default}
+.tl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;padding:10px 0 20px}
+.tl .box,.box{padding:16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+.box h3{margin:0 0 4px;font-size:15px}.box p{margin:0 0 12px;color:var(--dim);font-size:13px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.mini.on{background:linear-gradient(135deg,var(--a1),var(--a2));border-color:transparent}
+.ckv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;padding:6px 0 18px}.ckv b{color:var(--dim);font-weight:600}.ckv span{font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+.sticks{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;justify-content:center}.sticks canvas{width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.trig{width:26px;height:150px;border-radius:8px;border:1px solid var(--line);position:relative;overflow:hidden}.trig i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,var(--a1),var(--a3))}
+.pressed{display:flex;flex-wrap:wrap;gap:6px;min-height:28px;padding:10px 0}.pressed .chip{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff}
+.box input[type=range]{flex:1}label{font-size:13px;color:var(--mut);display:flex;gap:8px;align-items:center;margin:6px 0}
+.log{font:12px ui-monospace,Consolas,monospace;color:var(--mut);min-height:18px;padding-top:8px}
+.btn input[type=number]{width:100%;background:var(--bg2);color:var(--fg);border:1px solid var(--line2);border-radius:8px;padding:6px}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
 .hidden{display:none!important}
 /* motion */
@@ -209,7 +220,7 @@ footer a{color:var(--mut)}
   </div>
 </section>
 
-<footer>MiraLink-DS5 · fork de <a href="https://github.com/awalol/DS5Dongle">DS5Dongle</a> par awalol · <a href="https://github.com/LeParfait271/MiraLink-DS5">GitHub</a><br>Photo : <a href="https://commons.wikimedia.org/wiki/File:Playstation_5_DualSense_controller_in_Midnight_Black,_2026-02-07_(front).jpg">Chris Woodrich</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, détourée</footer>
+<footer>MiraLink-DS5 · fork de <a href="https://github.com/awalol/DS5Dongle">DS5Dongle</a> par awalol · <a href="https://github.com/LeParfait271/MiraLink-DS5">GitHub</a><br>Photo : <a href="https://commons.wikimedia.org/wiki/File:Playstation_5_DualSense_controller_in_Midnight_Black,_2026-02-07_(front).jpg">Chris Woodrich</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, détourée · outils manette d'après <a href="https://github.com/dualshock-tools/dualshock-tools.github.io">dualshock-tools</a> (MIT)</footer>
 </div>
 
 <div class="dock" id="dock">
@@ -230,6 +241,7 @@ const I = {
   snd: '<path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
   pc: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
   adv: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  tools: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
   btn: '<circle cx="12" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/>',
 };
 const icon = (k) => `<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg></div>`;
@@ -277,6 +289,7 @@ const TABS = [
     ["status_gpio_mode", L({0: "Continu", 1: "Impulsion"}), "Mode GPIO", ""],
   ]},
   {id: "btn", title: "Boutons", sub: "Change l'action de chaque bouton", remap: true},
+  {id: "tools", title: "Outils", sub: "Infos, tests et calibration de la manette"},
 ];
 const RESTART = new Set(["enable_usb_sn", "controller_mode", "enable_keyboard"]);
 const BUTTONS = ["Haut", "Haut-droite", "Droite", "Bas-droite", "Bas", "Bas-gauche", "Gauche", "Haut-gauche",
@@ -446,6 +459,8 @@ function renderPanel() {
   const t = TABS.find((x) => x.id === tab), p = $("panel");
   p.innerHTML = `<div class="sec"><div class="sec-h">${icon(t.id)}<div><h2>${t.title}</h2><p>${t.sub}</p></div></div></div>`;
   const sec = p.firstChild;
+  if (dev) dev.oninputreport = null;
+  if (t.id === "tools") { toolsPanel(sec); return; }
   if (t.id === "pad") {
     sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Profils rapides</div>');
     const pr = document.createElement("div"); pr.className = "presets";
@@ -488,6 +503,229 @@ function renderPanel() {
     sec.insertAdjacentHTML("beforeend", '<div class="lbl-s" style="padding-top:18px;border-top:1px solid var(--line)">Sauvegarde</div>');
     backupTools(sec);
   }
+}
+
+// ---- Controller tools (protocol from dualshock-tools, MIT) -----------------
+// Feature reports are relayed by the Pico to the controller over Bluetooth.
+const FEAT_LEN = {0x80: 63, 0x82: 9};
+async function feat(id) {
+  const dv = await dev.receiveFeatureReport(id);
+  let u = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength);
+  if (u[0] !== id) { const t = new Uint8Array(u.length + 1); t[0] = id; t.set(u, 1); u = t; }
+  return u; // u[0] = report id, like dualshock-tools
+}
+async function featSet(id, bytes) {
+  const b = new Uint8Array(FEAT_LEN[id] || 63); b.set(bytes.slice(0, b.length));
+  await dev.sendFeatureReport(id, b);
+}
+const hex = (u) => Array.from(u, (x) => x.toString(16).padStart(2, "0")).join("");
+const be32 = (u, o) => ((u[o] << 24) | (u[o + 1] << 16) | (u[o + 2] << 8) | u[o + 3]) >>> 0;
+async function sysInfo(base, num, len, text = true) {
+  await featSet(0x80, [base, num]); await sleep(60);
+  const u = await feat(0x81);
+  if (u[1] !== base || u[2] !== num || u[3] !== 2) return "–";
+  const d = u.slice(4, 4 + len);
+  return text ? new TextDecoder().decode(d).replace(/\0.*$/s, "") : hex(d);
+}
+async function nvs() {
+  await featSet(0x80, [3, 3]); await sleep(60);
+  const r = be32(await feat(0x81), 1);
+  return {0x03030201: "verrouillée", 0x03030200: "déverrouillée", 0x15010100: "redémarrage requis"}[r] || "inconnu (" + r.toString(16) + ")";
+}
+async function nvsUnlock() { await featSet(0x80, [3, 2, 101, 50, 64, 12]); await sleep(60); await feat(0x81); }
+async function nvsLock() { await featSet(0x80, [3, 1]); await sleep(60); await feat(0x81); }
+async function calib(cmd, expect) {
+  await featSet(0x82, cmd); await sleep(120);
+  const r = be32(await feat(0x83), 0);
+  if (r !== expect) throw new Error("la manette a refusé (réponse " + r.toString(16) + ")");
+}
+
+// Output report 0x02 (USB layout, 47 bytes after the id).
+const out = {rgb: [0, 0, 255], players: 4, mute: 0};
+async function sendOut(f) {
+  const b = new Uint8Array(47); f(b); await dev.sendReport(0x02, b);
+}
+const lightOut = () => sendOut((b) => {
+  b[1] = 0x01 | 0x04 | 0x10; b[8] = out.mute; b[43] = out.players; b.set(out.rgb, 44);
+});
+const rumble = (l, r) => sendOut((b) => { b[0] = 0x01 | 0x02; b[2] = r; b[3] = l; });
+const trigOut = (mode, start, force) => sendOut((b) => {
+  b[0] = 0x04 | 0x08;
+  for (const o of [10, 21]) { b[o] = mode; b[o + 1] = start; b[o + 2] = force; }
+});
+
+function box(sec, title, text) {
+  const d = document.createElement("div"); d.className = "box";
+  d.innerHTML = `<h3>${title}</h3><p>${text}</p>`; sec.append(d); return d;
+}
+function act(parent, label, fn, logEl) {
+  const b = document.createElement("button"); b.className = "mini"; b.textContent = label;
+  b.onclick = async () => {
+    b.disabled = true;
+    try { const r = await fn(); if (logEl && r) logEl.innerHTML = r; }
+    catch (e) { if (logEl) logEl.innerHTML = `<span class="err">Échec : ${e.message}</span>`; }
+    b.disabled = false;
+  };
+  let row = parent.querySelector(".acts");
+  if (!row) { row = document.createElement("div"); row.className = "acts"; parent.append(row); }
+  row.append(b); return b;
+}
+const logOf = (box) => { const l = document.createElement("div"); l.className = "log"; box.append(l); return l; };
+
+const PRESS = [[8, 0x10, "Carré"], [8, 0x20, "Croix"], [8, 0x40, "Rond"], [8, 0x80, "Triangle"],
+  [9, 1, "L1"], [9, 2, "R1"], [9, 4, "L2"], [9, 8, "R2"], [9, 0x10, "Create"], [9, 0x20, "Options"],
+  [9, 0x40, "L3"], [9, 0x80, "R3"], [10, 1, "PS"], [10, 2, "Pavé"], [10, 4, "Mute"]];
+const DPAD = ["Haut", "Haut-droite", "Droite", "Bas-droite", "Bas", "Bas-gauche", "Gauche", "Haut-gauche"];
+
+function toolsPanel(sec) {
+  // --- Infos
+  sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Infos manette</div>');
+  const kv = document.createElement("div"); kv.className = "ckv"; kv.innerHTML = "<b>…</b><span>lecture</span>";
+  sec.append(kv);
+  (async () => {
+    const rows = [];
+    try {
+      const u = await feat(0x20), td = new TextDecoder();
+      if (u.length >= 32) {
+        const dv = new DataView(u.buffer, u.byteOffset);
+        rows.push(["Firmware", "0x" + dv.getUint32(28, true).toString(16).padStart(8, "0")],
+          ["Compilé le", td.decode(u.slice(1, 12)) + " " + td.decode(u.slice(12, 20))],
+          ["Matériel", "0x" + dv.getUint32(24, true).toString(16).padStart(8, "0")]);
+      }
+      rows.push(["N° de série", await sysInfo(1, 19, 17)], ["PCBA", await sysInfo(1, 17, 14)],
+        ["Batterie", await sysInfo(1, 24, 23)], ["Pavé tactile FW", await sysInfo(5, 4, 8, false)],
+        ["Mémoire (NVS)", await nvs()]);
+    } catch (e) { rows.push(["Erreur", e.message + " · manette allumée ?"]); }
+    kv.innerHTML = rows.map(([k, v]) => `<b>${k}</b><span>${v}</span>`).join("");
+  })();
+
+  // --- Live input test
+  sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Test des entrées</div>');
+  const live = document.createElement("div"); live.className = "box"; live.style.margin = "10px 0 20px";
+  live.innerHTML = `<div class="sticks"><canvas width=300 height=300></canvas><div class="trig"><i></i></div>
+    <div class="trig"><i></i></div><canvas width=300 height=300></canvas></div>
+    <div class="pressed"></div><p style="color:var(--dim);font-size:13px;margin:0">Fais tourner les sticks à fond :
+    la trace doit former un cercle régulier. <button class="mini" style="margin-left:8px">Effacer la trace</button></p>`;
+  sec.append(live);
+  const [cl, cr] = live.querySelectorAll("canvas"), [tl, tr] = live.querySelectorAll(".trig i");
+  const trace = [[], []];
+  live.querySelector("button").onclick = () => { trace[0] = []; trace[1] = []; };
+  const draw = (cv, x, y, tr) => {
+    const g = cv.getContext("2d"), c = 150, R = 140; g.clearRect(0, 0, 300, 300);
+    g.strokeStyle = "rgba(255,255,255,.12)"; g.lineWidth = 2;
+    g.beginPath(); g.arc(c, c, R, 0, 7); g.moveTo(c - R, c); g.lineTo(c + R, c); g.moveTo(c, c - R); g.lineTo(c, c + R); g.stroke();
+    const px = (v) => c + (v - 128) / 128 * R;
+    tr.push([px(x), px(y)]); if (tr.length > 600) tr.shift();
+    g.strokeStyle = "rgba(77,124,255,.8)"; g.beginPath(); tr.forEach(([a, b], i) => i ? g.lineTo(a, b) : g.moveTo(a, b)); g.stroke();
+    g.fillStyle = "#22d3ee"; g.beginPath(); g.arc(px(x), px(y), 10, 0, 7); g.fill();
+  };
+  const pressed = live.querySelector(".pressed");
+  let last = "";
+  dev.oninputreport = (e) => {
+    if (e.reportId !== 1 || !document.body.contains(live)) return;
+    const d = new Uint8Array(e.data.buffer, e.data.byteOffset, e.data.byteLength);
+    // USB 0x01: LX LY RX RY L2 R2 seq buttons[7..9]
+    draw(cl, d[0], d[1], trace[0]); draw(cr, d[2], d[3], trace[1]);
+    tl.style.height = d[4] / 2.55 + "%"; tr.style.height = d[5] / 2.55 + "%";
+    const names = PRESS.filter(([o, m]) => d[o - 1] & m).map((x) => x[2]);
+    const dp = d[7] & 15; if (dp < 8) names.unshift(DPAD[dp]);
+    const key = names.join();
+    if (key !== last) { last = key; pressed.innerHTML = names.length ? names.map((n) => `<span class="chip">${n}</span>`).join("") : '<span class="chip">Appuie sur un bouton</span>'; }
+  };
+
+  // --- Outputs
+  sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Tests des sorties</div>');
+  const tlw = document.createElement("div"); tlw.className = "tl"; sec.append(tlw);
+  const vb = box(tlw, "Vibrations", "Teste chaque moteur séparément.");
+  act(vb, "Gauche", async () => { await rumble(255, 0); await sleep(700); await rumble(0, 0); });
+  act(vb, "Droite", async () => { await rumble(0, 255); await sleep(700); await rumble(0, 0); });
+  act(vb, "Les deux", async () => { await rumble(255, 255); await sleep(700); await rumble(0, 0); });
+
+  const lb = box(tlw, "Lumières", "Barre lumineuse, LED joueur et LED du micro.");
+  const col = document.createElement("input"); col.type = "color"; col.value = "#0000ff";
+  const lab = document.createElement("label"); lab.append("Couleur ", col); lb.append(lab);
+  col.oninput = () => { out.rgb = [1, 3, 5].map((i) => parseInt(col.value.slice(i, i + 2), 16)); lightOut(); };
+  act(lb, "Joueur 1–4", () => { out.players = [4, 10, 21, 27][(([4, 10, 21, 27].indexOf(out.players)) + 1) % 4]; return lightOut(); });
+  act(lb, "LED micro", () => { out.mute = (out.mute + 1) % 3; return lightOut(); });
+
+  const tb = box(tlw, "Gâchettes adaptatives", "Ajoute une résistance sur L2 et R2.");
+  const fr = document.createElement("input"); fr.type = "range"; fr.min = 0; fr.max = 255; fr.value = 180;
+  const fl = document.createElement("label"); fl.append("Force ", fr); tb.append(fl);
+  act(tb, "Activer", () => trigOut(0x01, 40, Number(fr.value)));
+  act(tb, "Désactiver", () => trigOut(0x00, 0, 0));
+
+  const sb = box(tlw, "Haut-parleur", "Joue un bip sur le haut-parleur de la manette.");
+  act(sb, "Bip 1 s", async () => {
+    await featSet(0x80, [6, 4, 0, 0, 0, 0, 4, 0, 6]); await featSet(0x80, [6, 2, 1, 1, 0]);
+    await sleep(1000); await featSet(0x80, [6, 2, 0, 1, 0]);
+  });
+
+  // --- Calibration
+  sec.insertAdjacentHTML("beforeend", '<div class="lbl-s">Calibration des sticks</div>');
+  const cw = document.createElement("div"); cw.className = "tl"; sec.append(cw);
+  const opt = document.createElement("label");
+  opt.innerHTML = '<input type="checkbox" checked> Enregistrer dans la manette (sinon annulé au redémarrage)';
+  const perm = () => opt.querySelector("input").checked;
+  const wrap = async (fn) => { if (perm()) await nvsUnlock(); try { await fn(); } finally { if (perm()) await nvsLock(); } };
+
+  const cb = box(cw, "Centre", "Lâche les deux sticks et pose la manette à plat, puis lance.");
+  const cl1 = logOf(cb);
+  act(cb, "Calibrer le centre", () => wrap(async () => {
+    cl1.textContent = "Ne touche pas les sticks…";
+    await calib([1, 1, 1], 0x83010101);
+    for (let i = 0; i < 3; i++) { await sleep(300); await calib([3, 1, 1], 0x83010101); }
+    await calib([2, 1, 1], 0x83010102);
+  }).then(() => '<span class="ok">Centre calibré ✓</span>'), cl1);
+
+  const rb = box(cw, "Amplitude", "Lance, fais tourner les deux sticks à fond plusieurs fois, puis termine.");
+  const rl = logOf(rb);
+  let rangeOn = false;
+  const rbtn = act(rb, "Démarrer", async () => {
+    if (!rangeOn) {
+      if (perm()) await nvsUnlock();
+      await calib([1, 1, 2], 0x83010201); rangeOn = true; rbtn.textContent = "Terminer"; rbtn.classList.add("on");
+      return "Tourne les sticks à fond, 3–4 tours chacun…";
+    }
+    try { await calib([2, 1, 2], 0x83010202); } finally { if (perm()) await nvsLock(); }
+    rangeOn = false; rbtn.textContent = "Démarrer"; rbtn.classList.remove("on");
+    return '<span class="ok">Amplitude calibrée ✓</span>';
+  }, rl);
+
+  const xb = box(cw, "Manette", "Redémarre la manette (elle se reconnecte toute seule).");
+  const xl = logOf(xb);
+  act(xb, "État mémoire", async () => "Mémoire : " + await nvs(), xl);
+  act(xb, "Redémarrer", async () => { await featSet(0x80, [1, 1]); return "Redémarrage…"; }, xl);
+  sec.append(opt);
+
+  // --- Finetune (expert)
+  const det = document.createElement("details");
+  det.innerHTML = '<summary class="lbl-s" style="cursor:pointer;padding:14px 0">Réglage fin (expert)</summary>' +
+    '<div class="note">12 valeurs internes de calibration. Ne modifie que si tu sais ce que tu fais.</div>';
+  const fg = document.createElement("div"); fg.className = "grid"; det.append(fg);
+  const fbox = document.createElement("div"); det.append(fbox);
+  const flog = logOf(fbox);
+  let fvals = null;
+  act(fbox, "Lire", async () => {
+    await featSet(0x80, [12, 2]); await sleep(100);
+    const u = await feat(0x81);
+    if (u[1] !== 12 || (u[2] !== 2 && u[2] !== 4) || u[3] !== 2) throw new Error("réponse inattendue");
+    const dv = new DataView(u.buffer, u.byteOffset);
+    fvals = Array.from({length: 12}, (_, i) => dv.getUint16(4 + i * 2, true));
+    fg.innerHTML = "";
+    fvals.forEach((v, i) => {
+      const c = document.createElement("div"); c.className = "btn";
+      c.innerHTML = `<div class="k">Valeur ${i + 1}</div>`;
+      const n = document.createElement("input"); n.type = "number"; n.min = 0; n.max = 65535; n.value = v;
+      n.oninput = () => { fvals[i] = Number(n.value) & 0xFFFF; }; c.append(n); fg.append(c);
+    });
+    return "Valeurs lues.";
+  }, flog);
+  act(fbox, "Écrire", () => wrap(async () => {
+    if (!fvals) throw new Error("lis d'abord les valeurs");
+    await featSet(0x80, fvals.reduce((a, v) => a.concat([v & 0xFF, v >> 8]), [12, 1])); await sleep(100);
+  }).then(() => '<span class="ok">Écrit ✓</span>'), flog);
+  sec.append(det);
+  sec.insertAdjacentHTML("beforeend", '<div class="note">Ces outils passent par le Pico en Bluetooth. La calibration ne corrige pas un vrai drift matériel.</div>');
 }
 
 async function readStatus() {
